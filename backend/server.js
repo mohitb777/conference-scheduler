@@ -9,16 +9,20 @@ const scheduleRoutes = require('./routes/scheduleRoutes');
 const app = express();
 
 // Use CORS middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173'],  // Add your frontend URL
+  credentials: true
+}));
 
 app.use(express.json());
 
 // Connect to MongoDB with error handling
-mongoose.connect('mongodb://localhost:27017/conference-db', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  dbName: 'conference-db'
 })
-.then(() => console.log('Connected to MongoDB'))
+.then(() => console.log('Connected to MongoDB Atlas - conference-db'))
 .catch(err => console.error('MongoDB connection error:', err));
 
 // API routes

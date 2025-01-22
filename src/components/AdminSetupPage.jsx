@@ -84,18 +84,19 @@ const AdminSetupPage = () => {
       try {
         // First try to get existing papers
         const response = await fetch('http://localhost:8080/api/papers');
-        if (!response.ok) throw new Error('Failed to fetch papers');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch papers: ${response.status} ${response.statusText}`);
+        }
         const data = await response.json();
-        
         if (data.length === 0) {
           // If no papers exist, try to seed with dummy data
           const seedResponse = await fetch('http://localhost:8080/api/papers/seed', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
           });
-          if (!seedResponse.ok) throw new Error('Failed to seed papers');
+          if (!seedResponse.ok) {
+            throw new Error(`Failed to seed papers: ${seedResponse.status} ${seedResponse.statusText}`);
+          }
           const seedData = await seedResponse.json();
           setPapers(seedData);
         } else {
@@ -103,7 +104,7 @@ const AdminSetupPage = () => {
         }
       } catch (error) {
         console.error('Error fetching papers:', error);
-        toast.error('Server connection failed. Please check if the server is running.');
+        toast.error(error.message);
       }
     };
     fetchPapers();
