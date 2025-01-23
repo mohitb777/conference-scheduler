@@ -267,7 +267,7 @@ const ScheduleViewer = () => {
         return;
       }
 
-      const response = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/send-confirmation/${paperId}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.SEND_CONFIRMATION(paperId)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
