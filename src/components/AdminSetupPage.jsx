@@ -114,7 +114,8 @@ const AdminSetupPage = () => {
   const handlePaperSelect = async (index, paperId) => {
     try {
       // Check if paper is already scheduled
-      const scheduleResponse = await fetch(`/api/schedule/check/${paperId}`);
+    //  const scheduleResponse = await fetch(`/api/schedule/check/${paperId}`);
+      const scheduleResponse = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/check/${paperId}`);
       const scheduleData = await scheduleResponse.json();
       
       if (scheduleData.isScheduled) {
