@@ -23,10 +23,19 @@ app.use(express.json());
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  dbName: 'conference-db'
+  dbName: 'conference-db',
+  serverSelectionTimeoutMS: 5000,
+  heartbeatFrequencyMS: 1000
 })
 .then(() => console.log('Connected to MongoDB Atlas - conference-db'))
-.catch(err => console.error('MongoDB connection error:', err));
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1);  // Exit if we can't connect to database
+});
+
+mongoose.connection.on('error', err => {
+  console.error('MongoDB error:', err);
+});
 
 // API routes
 app.use('/api', apiRoutes);
