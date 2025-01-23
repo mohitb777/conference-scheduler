@@ -11,7 +11,7 @@ const app = express();
 // Use CORS middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://ramsita-3ecakprg7-ishmeet-kour-bhatias-projects.vercel.app']
+    ? ['https://ramsita-lovat.vercel.app']
     : ['http://localhost:5173'],
   credentials: true
 }));
