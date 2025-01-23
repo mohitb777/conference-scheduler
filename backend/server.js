@@ -32,17 +32,38 @@ mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   dbName: 'conference-db',
-  serverSelectionTimeoutMS: 5000,
-  heartbeatFrequencyMS: 1000
+  serverSelectionTimeoutMS: 30000,  // Increased from 5000
+  socketTimeoutMS: 30000,
+  connectTimeoutMS: 30000,
+  heartbeatFrequencyMS: 1000,
+  retryWrites: true,
+  w: 'majority'
 })
 .then(() => console.log('Connected to MongoDB Atlas - conference-db'))
 .catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);  // Exit if we can't connect to database
+  console.error('MongoDB connection error:', {
+    message: err.message,
+    code: err.code,
+    name: err.name
+  });
+  process.exit(1);
 });
 
+// Add more detailed error handling
 mongoose.connection.on('error', err => {
-  console.error('MongoDB error:', err);
+  console.error('MongoDB runtime error:', {
+    message: err.message,
+    code: err.code,
+    name: err.name
+  });
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected. Attempting to reconnect...');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('MongoDB reconnected successfully');
 });
 
 // API routes

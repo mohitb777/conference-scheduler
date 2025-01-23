@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import StatusIndicator from './StatusIndicator';
 import { useAuth } from '../context/AuthContext';
 import { sessionTrackMapping, sessionVenueMapping } from '../constants/scheduleConstants';
+import { API_BASE_URL, API_ENDPOINTS } from '../config/api';
 
 const ScheduleViewer = () => {
   const { isAuthenticated, isAdmin, token } = useAuth();
@@ -230,7 +231,7 @@ const ScheduleViewer = () => {
         return;
       }
 
-      const response = await fetch('https://conference-scheduler-bay.vercel.app/api/schedule/send-emails', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.SEND_EMAILS}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
