@@ -1,12 +1,16 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Conference Scheduler Backend",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "vercel-build": "echo 'Building API'",
+    "deploy": "vercel deploy --prod"
   },
   "keywords": [],
   "author": "",
@@ -23,5 +27,8 @@
     "pdfkit": "^0.16.0",
     "pdfkit-table": "^0.1.99",
     "sanitize-html": "^2.14.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
   }
 }
