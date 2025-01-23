@@ -15,9 +15,10 @@ app.use(cors({
     "https://conference-scheduler-frontend10-6yv3eohp8.vercel.app",
     "http://localhost:5173"
   ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"]
+  allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
+  exposedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json());

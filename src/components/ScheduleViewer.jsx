@@ -58,9 +58,9 @@ const ScheduleViewer = () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'include'
+          'Accept': 'application/json',
+          'x-auth-token': token
+        }
       });
       
       if (!response.ok) {
