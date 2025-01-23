@@ -9,7 +9,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+       target: 'https://conference-scheduler-bay.vercel.app',
         changeOrigin: true,
         secure: false
       }
