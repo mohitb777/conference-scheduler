@@ -10,12 +10,20 @@ const app = express();
 
 // Use CORS middleware
 app.use(cors({
-  origin: '*',  // More permissive for debugging
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  credentials: true,
+  origin: [
+    "https://conference-scheduler-frontend10.vercel.app",
+    "https://conference-scheduler-frontend10-2fnce3876.vercel.app",
+    "https://conference-scheduler-frontend10-6yv3eohp8.vercel.app",
+    "http://localhost:5173"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
-  exposedHeaders: ["Content-Type", "Authorization"]
+  exposedHeaders: ["Content-Type", "Authorization"],
+  credentials: false  // Changed to false since we're using token-based auth
 }));
+
+// Add OPTIONS preflight handler
+app.options('*', cors());
 
 app.use(express.json());
 

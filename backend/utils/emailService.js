@@ -55,6 +55,14 @@ const createTransporter = async () => {
 
 const sendScheduleEmail = async (schedule) => {
   try {
+    let nodemailer;
+    try {
+      nodemailer = require('nodemailer');
+    } catch (error) {
+      console.error('Nodemailer import error:', error);
+      throw new Error('Email service temporarily unavailable');
+    }
+
     if (!schedule || !schedule.email) {
       console.error('Invalid schedule data:', schedule);
       throw new Error('Invalid schedule data: missing email');
@@ -165,14 +173,8 @@ const sendScheduleEmail = async (schedule) => {
       throw new Error(`Failed to send email: ${emailError.message}`);
     }
   } catch (error) {
-    console.error('Email service error details:', {
-      name: error.name,
-      message: error.message,
-      code: error.code,
-      command: error.command,
-      stack: error.stack
-    });
-    throw error; // Preserve the original error
+    console.error('Email service error:', error);
+    throw new Error('Failed to send email: Service temporarily unavailable');
   }
 };
 

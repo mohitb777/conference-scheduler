@@ -25,6 +25,7 @@
     "mongoose": "^8.9.3",
     "pdfkit": "^0.16.0",
     "pdfkit-table": "^0.1.99",
-    "sanitize-html": "^2.14.0"
+    "sanitize-html": "^2.14.0",
+    "nodemailer": "^6.9.7"
   }
 }
