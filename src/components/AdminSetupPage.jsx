@@ -83,7 +83,6 @@ const AdminSetupPage = () => {
     const fetchPapers = async () => {
       try {
         // First try to get existing papers
-       // const response = await fetch('http://localhost:8080/api/papers');
         const response = await fetch('https://conference-scheduler-bay.vercel.app/api/papers');
         if (!response.ok) {
           throw new Error(`Failed to fetch papers: ${response.status} ${response.statusText}`);
@@ -91,7 +90,7 @@ const AdminSetupPage = () => {
         const data = await response.json();
         if (data.length === 0) {
           // If no papers exist, try to seed with dummy data
-          const seedResponse = await fetch('http://localhost:8080/api/papers/seed', {
+          const seedResponse = await fetch('http://conference-scheduler-bay.vercel.app/api/papers/seed', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
           });
@@ -325,7 +324,7 @@ const AdminSetupPage = () => {
 
   const fetchAvailableSlots = async (date) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/schedule/available-slots?date=${date}`);
+      const response = await fetch(`http://conference-scheduler-bay.vercel.app/api/schedule/available-slots?date=${date}`);
       if (!response.ok) throw new Error('Failed to fetch available slots');
       const data = await response.json();
       
@@ -366,7 +365,7 @@ const AdminSetupPage = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:8080/api/schedule/send-emails', {
+      const response = await fetch('http://conference-scheduler-bay.vercel.app/api/schedule/send-emails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -603,7 +602,7 @@ const AdminSetupPage = () => {
 const checkTimeSlotAvailability = async (session, slot, date) => {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/schedule/check-availability?date=${date}&timeSlot=${slot}&session=${session}`
+      `http://conference-scheduler-bay.vercel.app/api/schedule/check-availability?date=${date}&timeSlot=${slot}&session=${session}`
     );
     if (!response.ok) throw new Error('Failed to check availability');
     const data = await response.json();

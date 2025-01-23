@@ -28,7 +28,7 @@ const RescheduleRequestPage = () => {
   useEffect(() => {
     const processRescheduleRequest = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/schedule/reschedule-request/${token}`, {
+        const response = await fetch(`http://conference-scheduler-bay.vercel.app/api/schedule/reschedule-request/${token}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'

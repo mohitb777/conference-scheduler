@@ -28,7 +28,7 @@ const NavigationBar = () => {
       const token = localStorage.getItem('token');
       if (isAuthenticated && token && !username) {
         try {
-          const response = await fetch('http://localhost:8080/api/users/me', {
+          const response = await fetch('http://conference-scheduler-bay.vercel.app/api/users/me', {
             headers: {
               'Content-Type': 'application/json',
               'x-auth-token': token
