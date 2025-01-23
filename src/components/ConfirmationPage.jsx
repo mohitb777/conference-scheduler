@@ -29,7 +29,7 @@ const ConfirmationPage = () => {
   useEffect(() => {
     const confirmAttendance = async () => {
       try {
-        const response = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/confirm/${token}`, {
+        const response = await fetch(`https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app/api/schedule/confirm/${token}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'

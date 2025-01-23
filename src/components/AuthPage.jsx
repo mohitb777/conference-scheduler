@@ -32,7 +32,7 @@ const AuthPage = () => {
 
       console.log('Sending request with body:', requestBody);
 
-      const response = await fetch(`https://conference-scheduler-bay.vercel.app${endpoint}`, {
+      const response = await fetch(`https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
