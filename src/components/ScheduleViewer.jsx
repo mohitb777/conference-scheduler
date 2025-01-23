@@ -54,7 +54,7 @@ const ScheduleViewer = () => {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://conference-scheduler-bay.vercel.app/api/schedule/all');
+      const response = await fetch('https://conference-scheduler-bay.vercel.app/api/schedule/all');
       const data = await response.json();
       if (response.ok) {
         setSchedules(data);
