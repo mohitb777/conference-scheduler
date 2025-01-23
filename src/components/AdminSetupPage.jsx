@@ -83,7 +83,8 @@ const AdminSetupPage = () => {
     const fetchPapers = async () => {
       try {
         // First try to get existing papers
-        const response = await fetch('http://localhost:8080/api/papers');
+       // const response = await fetch('http://localhost:8080/api/papers');
+        const response = await fetch('https://conference-scheduler-bay.vercel.app/api/papers');
         if (!response.ok) {
           throw new Error(`Failed to fetch papers: ${response.status} ${response.statusText}`);
         }
