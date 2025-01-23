@@ -28,7 +28,7 @@ const DenyPage = () => {
   useEffect(() => {
     const processDenial = async () => {
       try {
-        const response = await fetch(`http://conference-scheduler-bay.vercel.app/api/schedule/deny/${token}`, {
+        const response = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/deny/${token}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'

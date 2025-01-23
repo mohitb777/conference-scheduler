@@ -90,7 +90,7 @@ const ScheduleViewer = () => {
 
   const downloadPDF = async () => {
     try {
-      const response = await fetch('http://conference-scheduler-bay.vercel.app/api/schedule/download/pdf', {
+      const response = await fetch('https://conference-scheduler-bay.vercel.app/api/schedule/download/pdf', {
         method: 'GET',
         headers: {
           'Accept': 'application/pdf'
@@ -119,7 +119,7 @@ const ScheduleViewer = () => {
 
   const downloadExcel = async () => {
     try {
-      const response = await fetch('http://conference-scheduler-bay.vercel.app/api/schedule/download/excel', {
+      const response = await fetch('https://conference-scheduler-bay.vercel.app/api/schedule/download/excel', {
         method: 'GET',
         headers: {
           'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -157,14 +157,14 @@ const ScheduleViewer = () => {
       const otherDate = dates.find(date => date !== currentDate);
       
       // Get available slots for the other date
-      const response = await fetch(`http://conference-scheduler-bay.vercel.app/api/schedule/available-slots?date=${otherDate}`);
+      const response = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/available-slots?date=${otherDate}`);
       if (!response.ok) {
         throw new Error('Failed to fetch available slots');
       }
       const availableSlots = await response.json();
       
       // Get current schedule to check track
-      const scheduleResponse = await fetch(`http://conference-scheduler-bay.vercel.app/api/schedule/check/${paperId}`);
+      const scheduleResponse = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/check/${paperId}`);
       const scheduleData = await scheduleResponse.json();
       
       if (!scheduleResponse.ok || !scheduleData.schedule) {
@@ -183,7 +183,7 @@ const ScheduleViewer = () => {
       }
 
       // Reschedule the paper
-      const rescheduleResponse = await fetch(`http://conference-scheduler-bay.vercel.app/api/schedule/reschedule/${paperId}`, {
+      const rescheduleResponse = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/reschedule/${paperId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -222,7 +222,7 @@ const ScheduleViewer = () => {
         return;
       }
 
-      const response = await fetch('http://conference-scheduler-bay.vercel.app/api/schedule/send-emails', {
+      const response = await fetch('https://conference-scheduler-bay.vercel.app/api/schedule/send-emails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -258,7 +258,7 @@ const ScheduleViewer = () => {
         return;
       }
 
-      const response = await fetch(`http://conference-scheduler-bay.vercel.app/api/schedule/send-confirmation/${paperId}`, {
+      const response = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/send-confirmation/${paperId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
