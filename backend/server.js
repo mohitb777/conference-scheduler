@@ -10,7 +10,7 @@ const app = express();
 
 // Use CORS middleware
 app.use(cors({
-  origin: ['http://localhost:5173'],  // Add your frontend URL
+  origin: ['http://conference-scheduler-bay.vercel.app'],  // Add your frontend URL
   credentials: true
 }));
 
