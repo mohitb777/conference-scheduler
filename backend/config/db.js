@@ -2,9 +2,14 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      dbName: 'conference-db'
-    });
+    const options = {
+      dbName: 'conference-db',
+      retryWrites: true,
+      w: 'majority',
+      tls: true
+    };
+
+    await mongoose.connect(process.env.MONGODB_URI, options);
     console.log('Connected to MongoDB Atlas - conference-db');
   } catch (err) {
     console.error('MongoDB connection error:', err);
