@@ -3,8 +3,6 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       dbName: 'conference-db'
     });
     console.log('Connected to MongoDB Atlas - conference-db');
