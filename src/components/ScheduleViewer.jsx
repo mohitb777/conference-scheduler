@@ -54,13 +54,21 @@ const ScheduleViewer = () => {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://conference-scheduler-bay.vercel.app/api/schedule/all');
-      const data = await response.json();
-      if (response.ok) {
-        setSchedules(data);
-      } else {
-        toast.error('Failed to fetch schedules');
+      const response = await fetch('https://conference-scheduler-bay.vercel.app/api/schedule/all', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      const data = await response.json();
+      setSchedules(data);
     } catch (error) {
       console.error('Error fetching schedules:', error);
       toast.error('Failed to fetch schedules');

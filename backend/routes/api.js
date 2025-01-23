@@ -817,4 +817,12 @@ router.post('/schedule/send-confirmation/:paperId', authMiddleware, async (req, 
   }
 });
 
+router.get('/', (req, res) => {
+  res.json({ message: 'Conference Scheduler API is running' });
+});
+
+router.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
 module.exports = router; 

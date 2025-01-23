@@ -10,9 +10,14 @@ const app = express();
 
 // Use CORS middleware
 app.use(cors({
-  origin: ["https://conference-scheduler-frontend10.vercel.app"],  // Add your frontend URL  
-  methods:["POST","GET"],
-  credentials: true
+  origin: [
+    "https://conference-scheduler-frontend10.vercel.app",
+    "https://conference-scheduler-frontend10-6yv3eohp8.vercel.app",
+    "http://localhost:5173"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"]
 }));
 
 app.use(express.json());
