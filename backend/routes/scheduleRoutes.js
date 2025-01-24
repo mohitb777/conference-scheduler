@@ -58,10 +58,10 @@ router.get('/available-slots', async (req, res) => {
       }))
     );
     
-    res.json(availableSlots);
+    return res.json(availableSlots);
   } catch (error) {
     console.error('Error fetching available slots:', error);
-    res.status(500).json({ message: 'Error fetching available slots' });
+    return res.status(500).json({ message: 'Error fetching available slots' });
   }
 });
 
@@ -88,8 +88,8 @@ router.get('/check-conflicts', async (req, res) => {
   }
 });
 
-// Save schedule route
-router.post('/save', validateSchedule, async (req, res) => {
+// Save schedule route with auth middleware
+router.post('/save', [authMiddleware, validateSchedule], async (req, res) => {
   try {
     const schedules = Array.isArray(req.body) ? req.body : [req.body];
     
@@ -122,22 +122,25 @@ router.post('/save', validateSchedule, async (req, res) => {
             paperId: paper.paperId
           });
           
-          schedule.confirmationToken = token;
-          schedule.confirmationExpires = new Date(Date.now() + 48 * 60 * 60 * 1000);
-          await schedule.save();
+          await Schedule.findByIdAndUpdate(schedule._id, {
+            confirmationToken: token,
+            confirmationExpires: new Date(Date.now() + 48 * 60 * 60 * 1000)
+          });
         }
       } catch (emailError) {
         console.error('Failed to send confirmation email:', emailError);
       }
     }
 
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Schedules saved successfully',
       schedules: savedSchedules
     });
   } catch (error) {
     console.error('Save schedule error:', error);
-    res.status(500).json({ message: error.message || 'Error saving schedules' });
+    return res.status(500).json({ 
+      message: error.message || 'Error saving schedules'
+    });
   }
 });
 
