@@ -16,6 +16,21 @@ router.use((req, res, next) => {
   next();
 });
 
+// Add this near the top of the file, after the imports
+const allSessions = [
+  'Session 1', 'Session 2', 'Session 3', 'Session 4', 'Session 5',
+  'Session 6', 'Session 7', 'Session 8', 'Session 9', 'Session 10'
+];
+
+const getSessionsForDate = (date) => {
+  if (date === '2025-02-07') {
+    return allSessions.slice(0, 5); // First 5 sessions
+  } else if (date === '2025-02-08') {
+    return allSessions.slice(5); // Last 5 sessions
+  }
+  return [];
+};
+
 // Specific routes first
 router.post('/save', validateSchedule, async (req, res) => {
   try {
@@ -404,6 +419,45 @@ router.get('/check-conflicts', async (req, res) => {
       } : null
     });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update the available-slots route
+router.get('/available-slots', async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({ message: 'Date parameter is required' });
+    }
+
+    const sessionsForDate = getSessionsForDate(date);
+    
+    // Get all scheduled slots for this date
+    const scheduledSlots = await Schedule.find({ date }).select('timeSlots sessions -_id');
+    
+    const allTimeSlots = [
+      '11:30 AM - 1:00 PM',
+      '2:40 PM - 4:30 PM'
+    ];
+    
+    // Create map of used combinations
+    const usedCombos = new Set(
+      scheduledSlots.map(slot => `${slot.timeSlots}-${slot.sessions}`)
+    );
+    
+    // Filter out used combinations
+    const availableSlots = allTimeSlots.flatMap(timeSlot =>
+      sessionsForDate.map(session => ({
+        timeSlot,
+        session,
+        isAvailable: !usedCombos.has(`${timeSlot}-${session}`)
+      }))
+    );
+    
+    res.json(availableSlots);
+  } catch (error) {
+    console.error('Error fetching available slots:', error);
     res.status(500).json({ message: error.message });
   }
 });
