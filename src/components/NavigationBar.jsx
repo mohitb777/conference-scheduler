@@ -4,6 +4,7 @@ import acroLogo from '/src/assets/Acro.png';
 import homeIcon from '/src/assets/download.png';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const NavigationBar = () => {
       const token = localStorage.getItem('token');
       if (isAuthenticated && token && !username) {
         try {
-          const response = await fetch('https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app/api/users/me', {
+          const response = await fetch(`${API_BASE_URL}/users/me`, {
             headers: {
               'Content-Type': 'application/json',
               'x-auth-token': token

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { API_BASE_URL, API_ENDPOINTS } from '../config/api';
 
 const ConfirmationPage = () => {
   const { token } = useParams();
@@ -29,7 +30,7 @@ const ConfirmationPage = () => {
   useEffect(() => {
     const confirmAttendance = async () => {
       try {
-        const response = await fetch(`https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app/api/schedule/confirm/${token}`, {
+        const response = await fetch(`${API_BASE_URL}/schedule/confirm/${token}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'

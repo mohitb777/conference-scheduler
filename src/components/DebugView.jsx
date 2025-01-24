@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const DebugView = () => {
   const [schedules, setSchedules] = useState([]);
@@ -6,7 +7,7 @@ const DebugView = () => {
   useEffect(() => {
     const fetchAllSchedules = async () => {
       try {
-        const response = await fetch('https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app/api/schedule/all');
+        const response = await fetch(`${API_BASE_URL}/schedule/all`);
         if (response.ok) {
           const data = await response.json();
           setSchedules(data);
