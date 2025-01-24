@@ -18,24 +18,47 @@ router.use((req, res, next) => {
 });
 
 // Specific routes first
-router.post('/save', 
-  validateSchedule,
-  async (req, res) => {
-    try {
-      console.log('Received schedule data:', req.body);
-      const scheduleData = req.body;
-      const schedule = new Schedule(scheduleData);
-      await schedule.save();
-      res.status(201).json(schedule);
-    } catch (error) {
-      console.error('Error saving schedule:', error);
-      res.status(500).json({ 
-        message: 'Error saving schedule', 
-        error: error.message 
-      });
+router.post('/save', validateSchedule, async (req, res) => {
+  try {
+    const schedules = Array.isArray(req.body) ? req.body : [req.body];
+    
+    // Check for existing schedules
+    for (const schedule of schedules) {
+      const existingSchedule = await Schedule.findOne({ paperId: schedule.paperId });
+      if (existingSchedule) {
+        return res.status(400).json({
+          message: `Paper ${schedule.paperId} is already scheduled`
+        });
+      }
     }
+
+    // Check session capacity
+    for (const schedule of schedules) {
+      const sessionCount = await Schedule.countDocuments({
+        date: schedule.date,
+        sessions: schedule.sessions,
+        timeSlots: schedule.timeSlots
+      });
+      
+      if (sessionCount >= 15) {
+        return res.status(400).json({
+          message: `Session ${schedule.sessions} on ${schedule.date} at ${schedule.timeSlots} is full (maximum 15 papers)`
+        });
+      }
+    }
+
+    const savedSchedules = await Schedule.insertMany(schedules);
+    
+    res.status(201).json({
+      message: 'Schedules saved successfully',
+      schedules: savedSchedules
+    });
+
+  } catch (error) {
+    console.error('Save error:', error);
+    res.status(500).json({ message: error.message });
   }
-);
+});
 
 router.get('/latest', async (req, res) => {
   try {
@@ -356,6 +379,33 @@ router.get('/download/excel', async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ message: 'Error generating Excel file' });
     }
+  }
+});
+
+// Move the check-conflicts route
+router.get('/check-conflicts', async (req, res) => {
+  try {
+    const { date, timeSlot, session } = req.query;
+    
+    console.log('Checking conflicts for:', { date, timeSlot, session });
+    
+    const existing = await Schedule.findOne({
+      date: date,
+      timeSlots: timeSlot,
+      sessions: session
+    });
+    
+    res.json({ 
+      hasConflict: !!existing,
+      conflictDetails: existing ? {
+        paperId: existing.paperId,
+        timeSlot: existing.timeSlots,
+        session: existing.sessions,
+        date: existing.date
+      } : null
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
