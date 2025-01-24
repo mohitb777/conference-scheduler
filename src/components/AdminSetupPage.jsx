@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { sessionVenueMapping } from '../constants/scheduleConstants';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, API_ENDPOINTS } from '../config/api';
 
 const AdminSetupPage = () => {
   const navigate = useNavigate();
@@ -272,7 +272,7 @@ const AdminSetupPage = () => {
         venue: sessionVenueMapping[paper.sessions]
       }));
 
-      const response = await fetch(`${API_BASE_URL}/schedule/save`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.SAVE}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -281,14 +281,18 @@ const AdminSetupPage = () => {
         body: JSON.stringify(scheduleData)
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
+        throw new Error(data.message || 'Failed to save schedule');
       }
 
       toast.success('Papers scheduled successfully');
+      // Optionally refresh the page or clear the form
+      window.location.reload();
     } catch (error) {
-      toast.error(error.message);
+      console.error('Schedule save error:', error);
+      toast.error(error.message || 'Failed to save schedule');
     }
   };
 

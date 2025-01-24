@@ -5,6 +5,7 @@ export const API_ENDPOINTS = {
   REGISTER: '/users/register',
   SCHEDULE: {
     ALL: '/schedule/all',
+    SAVE: '/schedule/save',
     SEND_EMAILS: '/schedule/send-emails',
     SEND_CONFIRMATION: (paperId) => `/schedule/send-confirmation/${paperId}`,
     CHECK: (paperId) => `/schedule/check/${paperId}`,

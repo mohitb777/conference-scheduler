@@ -67,28 +67,22 @@ mongoose.connection.on('reconnected', () => {
 });
 
 // API routes
-app.use('/api', apiRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/schedule', scheduleRoutes);
+app.use('/api', apiRoutes);
 
-// Add this before the existing error handler
-app.use((req, res, next) => {
-  res.status(404).json({ message: 'Route not found' });
+// Add error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Global error:', err);
+  res.status(500).json({
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
 });
 
-// Update the existing error handler
-app.use((err, req, res, next) => {
-  console.error('Error:', {
-    message: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method
-  });
-  
-  res.status(err.status || 500).json({ 
-    message: err.message || 'Something went wrong!',
-    path: req.path
-  });
+// Add 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
 });
 
 // Add this after your error handlers but before module.exports
