@@ -630,3 +630,4 @@ const TimeSlotCheckbox = ({ slot, session, date, isChecked, onChange }) => {
 };
 
 export default AdminSetupPage;
+

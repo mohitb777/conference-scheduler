@@ -79,4 +79,5 @@ const scheduleSchema = new mongoose.Schema({
 
 scheduleSchema.index({ paperId: 1 }, { unique: true });
 
+
 module.exports = mongoose.model('Schedule', scheduleSchema); 
