@@ -31,7 +31,65 @@ const getSessionsForDate = (date) => {
   return [];
 };
 
-// Specific routes first
+// Static routes first
+router.get('/available-slots', async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({ message: 'Date parameter is required' });
+    }
+
+    const sessionsForDate = getSessionsForDate(date);
+    const scheduledSlots = await Schedule.find({ date }).select('timeSlots sessions -_id');
+    
+    const allTimeSlots = [
+      '11:30 AM - 1:00 PM',
+      '2:40 PM - 4:30 PM'
+    ];
+    
+    const usedCombos = new Set(
+      scheduledSlots.map(slot => `${slot.timeSlots}-${slot.sessions}`)
+    );
+    
+    const availableSlots = allTimeSlots.flatMap(timeSlot =>
+      sessionsForDate.map(session => ({
+        timeSlot,
+        session,
+        isAvailable: !usedCombos.has(`${timeSlot}-${session}`)
+      }))
+    );
+    
+    res.json(availableSlots);
+  } catch (error) {
+    console.error('Error fetching available slots:', error);
+    res.status(500).json({ message: 'Error fetching available slots' });
+  }
+});
+
+router.get('/check-conflicts', async (req, res) => {
+  try {
+    const { date, timeSlot, session } = req.query;
+    const existing = await Schedule.findOne({
+      date,
+      timeSlots: timeSlot,
+      sessions: session
+    });
+    
+    res.json({ 
+      hasConflict: !!existing,
+      conflictDetails: existing ? {
+        paperId: existing.paperId,
+        timeSlot: existing.timeSlots,
+        session: existing.sessions,
+        date: existing.date
+      } : null
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Then dynamic routes
 router.post('/save', validateSchedule, async (req, res) => {
   try {
     const schedules = Array.isArray(req.body) ? req.body : [req.body];
@@ -414,68 +472,6 @@ router.get('/download/excel', async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ message: 'Error generating Excel file' });
     }
-  }
-});
-
-// Move the check-conflicts route
-router.get('/check-conflicts', async (req, res) => {
-  try {
-    const { date, timeSlot, session } = req.query;
-    
-    console.log('Checking conflicts for:', { date, timeSlot, session });
-    
-    const existing = await Schedule.findOne({
-      date: date,
-      timeSlots: timeSlot,
-      sessions: session
-    });
-    
-    res.json({ 
-      hasConflict: !!existing,
-      conflictDetails: existing ? {
-        paperId: existing.paperId,
-        timeSlot: existing.timeSlots,
-        session: existing.sessions,
-        date: existing.date
-      } : null
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Update the available-slots route
-router.get('/available-slots', async (req, res) => {
-  try {
-    const { date } = req.query;
-    if (!date) {
-      return res.status(400).json({ message: 'Date parameter is required' });
-    }
-
-    const sessionsForDate = getSessionsForDate(date);
-    const scheduledSlots = await Schedule.find({ date }).select('timeSlots sessions -_id');
-    
-    const allTimeSlots = [
-      '11:30 AM - 1:00 PM',
-      '2:40 PM - 4:30 PM'
-    ];
-    
-    const usedCombos = new Set(
-      scheduledSlots.map(slot => `${slot.timeSlots}-${slot.sessions}`)
-    );
-    
-    const availableSlots = allTimeSlots.flatMap(timeSlot =>
-      sessionsForDate.map(session => ({
-        timeSlot,
-        session,
-        isAvailable: !usedCombos.has(`${timeSlot}-${session}`)
-      }))
-    );
-    
-    res.json(availableSlots);
-  } catch (error) {
-    console.error('Error fetching available slots:', error);
-    res.status(500).json({ message: 'Error fetching available slots' });
   }
 });
 
