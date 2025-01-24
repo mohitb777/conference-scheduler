@@ -166,14 +166,14 @@ const ScheduleViewer = () => {
       const otherDate = dates.find(date => date !== currentDate);
       
       // Get available slots for the other date
-      const response = await fetch(`https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app/api/schedule/available-slots?date=${otherDate}`);
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.CHECK(paperId)}`);
       if (!response.ok) {
         throw new Error('Failed to fetch available slots');
       }
       const availableSlots = await response.json();
       
       // Get current schedule to check track
-      const scheduleResponse = await fetch(`https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app/api/schedule/check/${paperId}`);
+      const scheduleResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.CHECK(paperId)}`);
       const scheduleData = await scheduleResponse.json();
       
       if (!scheduleResponse.ok || !scheduleData.schedule) {
