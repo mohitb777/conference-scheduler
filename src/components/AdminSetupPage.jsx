@@ -288,8 +288,9 @@ const AdminSetupPage = () => {
       }
 
       toast.success('Papers scheduled successfully');
-      // Optionally refresh the page or clear the form
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error('Schedule save error:', error);
       toast.error(error.message || 'Failed to save schedule');
