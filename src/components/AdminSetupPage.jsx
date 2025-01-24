@@ -263,33 +263,25 @@ const AdminSetupPage = () => {
         return;
       }
 
-      // Add debugging
-      console.log('Selected papers before mapping:', selectedPapers);
+      // Validate sessions are selected
+      const invalidPapers = selectedPapers.filter(paper => !paper.sessions);
+      if (invalidPapers.length > 0) {
+        toast.error(`Please select sessions for all papers before saving`);
+        return;
+      }
 
-      const scheduleData = selectedPapers.map(paper => {
-        const mappedData = {
-          paperId: paper.paperId,
-          email: paper.email,
-          contact: paper.contact,
-          title: paper.title,
-          mode: paper.mode.charAt(0).toUpperCase() + paper.mode.slice(1).toLowerCase(),
-          tracks: paper.tracks.trim(),  // Ensure tracks is trimmed
-          date: paper.date,
-          timeSlots: paper.timeSlots,
-          sessions: paper.sessions,
-          venue: sessionVenueMapping[paper.sessions]
-        };
-        
-        // Debug log for each paper
-        console.log('Mapped schedule data:', {
-          paperId: mappedData.paperId,
-          tracks: mappedData.tracks,
-          sessions: mappedData.sessions,
-          expectedTrack: sessionTrackMapping[mappedData.sessions]
-        });
-        
-        return mappedData;
-      });
+      const scheduleData = selectedPapers.map(paper => ({
+        paperId: paper.paperId,
+        email: paper.email,
+        contact: paper.contact,
+        title: paper.title,
+        mode: paper.mode.charAt(0).toUpperCase() + paper.mode.slice(1).toLowerCase(),
+        tracks: paper.tracks.trim(),
+        date: paper.date,
+        timeSlots: paper.timeSlots,
+        sessions: paper.sessions,
+        venue: sessionVenueMapping[paper.sessions]
+      }));
 
       const response = await fetch(`${API_BASE_URL}/schedule/save`, {
         method: 'POST',
