@@ -15,7 +15,8 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'https://conference-scheduler-bay.vercel.app',
-        changeOrigin: true,
+        changeOrigin: true, 
+        //
         secure: false
       }
     }
