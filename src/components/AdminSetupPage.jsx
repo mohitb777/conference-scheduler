@@ -234,7 +234,7 @@ const AdminSetupPage = () => {
     }
 
     const expectedTrack = sessionTrackMapping[selectedSession];
-    if (currentPaper.tracks !== expectedTrack) {
+    if (normalizeTrackName(currentPaper.tracks) !== normalizeTrackName(expectedTrack)) {
       toast.error(`Session ${selectedSession} can only be assigned to papers from track: ${expectedTrack}`);
       return;
     }
