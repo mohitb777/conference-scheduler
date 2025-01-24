@@ -13,4 +13,12 @@ const API_ENDPOINTS = {
   }
 };
 
-export { API_BASE_URL, API_ENDPOINTS };
+// Default fetch options
+const defaultOptions = {
+  credentials: 'include',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+};
+
+export { API_BASE_URL, API_ENDPOINTS, defaultOptions };
