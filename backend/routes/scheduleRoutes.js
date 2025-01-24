@@ -453,8 +453,6 @@ router.get('/available-slots', async (req, res) => {
     }
 
     const sessionsForDate = getSessionsForDate(date);
-    
-    // Get all scheduled slots for this date
     const scheduledSlots = await Schedule.find({ date }).select('timeSlots sessions -_id');
     
     const allTimeSlots = [
@@ -462,12 +460,10 @@ router.get('/available-slots', async (req, res) => {
       '2:40 PM - 4:30 PM'
     ];
     
-    // Create map of used combinations
     const usedCombos = new Set(
       scheduledSlots.map(slot => `${slot.timeSlots}-${slot.sessions}`)
     );
     
-    // Filter out used combinations
     const availableSlots = allTimeSlots.flatMap(timeSlot =>
       sessionsForDate.map(session => ({
         timeSlot,
@@ -479,7 +475,7 @@ router.get('/available-slots', async (req, res) => {
     res.json(availableSlots);
   } catch (error) {
     console.error('Error fetching available slots:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Error fetching available slots' });
   }
 });
 

@@ -281,16 +281,13 @@ const AdminSetupPage = () => {
         body: JSON.stringify(scheduleData)
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to save schedule');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save schedule');
       }
 
       toast.success('Papers scheduled successfully');
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      setTimeout(() => window.location.reload(), 1500);
     } catch (error) {
       console.error('Schedule save error:', error);
       toast.error(error.message || 'Failed to save schedule');
@@ -308,36 +305,23 @@ const AdminSetupPage = () => {
 
   const fetchAvailableSlots = async (date) => {
     try {
-      const response = await fetch(`https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app/api/schedule/available-slots?date=${date}`);
-      if (!response.ok) throw new Error('Failed to fetch available slots');
+      const response = await fetch(`${API_BASE_URL}/schedule/available-slots?date=${date}`, {
+        headers: {
+          'Accept': 'application/json',
+          'x-auth-token': localStorage.getItem('token')
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch available slots');
+      }
+      
       const data = await response.json();
-      
-      // Transform the data into a more usable format
-      const availableSlotsMap = {};
-      data.forEach(({ session, timeSlot, isAvailable }) => {
-        if (!availableSlotsMap[session]) {
-          availableSlotsMap[session] = [];
-        }
-        if (isAvailable) {
-          availableSlotsMap[session].push(timeSlot);
-        }
-      });
-      
-      // Update the sessionTimeSlots state to only include available slots
-      setSessionTimeSlots(prev => {
-        const newSessionTimeSlots = {};
-        Object.keys(prev).forEach(session => {
-          newSessionTimeSlots[session] = prev[session].filter(slot => 
-            availableSlotsMap[session]?.includes(slot)
-          );
-        });
-        return newSessionTimeSlots;
-      });
-      
-      setAvailableTimeSlots(availableSlotsMap);
+      return data;
     } catch (error) {
       console.error('Error fetching available slots:', error);
-      toast.error('Failed to fetch available time slots');
+      toast.error('Failed to fetch available slots');
+      return [];
     }
   };
 
