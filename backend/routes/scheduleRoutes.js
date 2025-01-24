@@ -59,6 +59,16 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// Get all tracks - move before dynamic route
+router.get('/tracks', async (req, res) => {
+  try {
+    const tracks = await Schedule.distinct('track');
+    res.json(tracks);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Dynamic route last
 router.get('/:id', async (req, res) => {
   if (req.params.id === 'save') {
@@ -76,16 +86,6 @@ router.get('/:id', async (req, res) => {
       message: 'Error fetching schedule', 
       error: error.message 
     });
-  }
-});
-
-// Get all tracks
-router.get('/tracks', async (req, res) => {
-  try {
-    const tracks = await Schedule.distinct('track');
-    res.json(tracks);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
 });
 
