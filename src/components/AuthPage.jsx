@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL, API_ENDPOINTS } from '../config/api';
 
 const AuthPage = () => {
   const { login } = useAuth();
@@ -24,7 +25,7 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = isLogin ? '/api/users/login' : '/api/users/register';
+      const endpoint = isLogin ? `${API_BASE_URL}${API_ENDPOINTS.LOGIN}` : `${API_BASE_URL}${API_ENDPOINTS.REGISTER}`;
       const requestBody = isLogin ? {
         username: formData.username,
         password: formData.password
@@ -32,7 +33,7 @@ const AuthPage = () => {
 
       console.log('Sending request with body:', requestBody);
 
-      const response = await fetch(`https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
