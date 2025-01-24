@@ -1,6 +1,6 @@
 const API_BASE_URL = 'https://conference-scheduler-bay.vercel.app/api';
 
-export const API_ENDPOINTS = {
+const API_ENDPOINTS = {
   LOGIN: '/users/login',
   REGISTER: '/users/register',
   SCHEDULE: {
