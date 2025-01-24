@@ -8,6 +8,14 @@
   ],
   "routes": [
     {
+      "src": "/api/users/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/api/schedule/(.*)",
+      "dest": "/server.js"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/server.js"
     },
