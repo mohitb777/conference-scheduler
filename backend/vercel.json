@@ -18,14 +18,6 @@
       }
     },
     {
-      "src": "/api/users/(.*)",
-      "dest": "/server.js"
-    },
-    {
-      "src": "/api/schedule/(.*)",
-      "dest": "/server.js"
-    },
-    {
       "src": "/(.*)",
       "dest": "/server.js"
     }
