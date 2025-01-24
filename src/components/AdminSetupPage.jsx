@@ -281,9 +281,10 @@ const AdminSetupPage = () => {
         body: JSON.stringify(scheduleData)
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save schedule');
+        throw new Error(data.message || 'Failed to save schedule');
       }
 
       toast.success('Papers scheduled successfully');
