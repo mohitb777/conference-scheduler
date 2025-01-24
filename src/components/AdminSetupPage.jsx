@@ -91,7 +91,7 @@ const AdminSetupPage = () => {
         const data = await response.json();
         if (data.length === 0) {
           // If no papers exist, try to seed with dummy data
-          const seedResponse = await fetch('https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app/api/papers/seed', {
+          const seedResponse = await fetch(`${API_BASE_URL}/papers/seed`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
           });

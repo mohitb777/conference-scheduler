@@ -173,7 +173,7 @@ const ScheduleViewer = () => {
       const availableSlots = await response.json();
       
       // Get current schedule to check track
-      const scheduleResponse = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/check/${paperId}`);
+      const scheduleResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.CHECK(paperId)}`);
       const scheduleData = await scheduleResponse.json();
       
       if (!scheduleResponse.ok || !scheduleData.schedule) {
