@@ -39,7 +39,7 @@ const validateSchedule = async (req, res, next) => {
       }
 
       // Validate track matches paper
-      if (schedule.tracks !== paper.tracks) {
+      if (normalizeTrackName(schedule.tracks) !== normalizeTrackName(paper.tracks)) {
         return res.status(400).json({
           message: `Invalid track for paper ${schedule.paperId}. Expected: ${paper.tracks}`
         });

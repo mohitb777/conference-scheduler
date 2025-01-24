@@ -60,7 +60,9 @@ const scheduleSchema = new mongoose.Schema({
     validate: {
       validator: function(session) {
         const normalizeTrackName = str => str?.trim().toLowerCase();
-        return normalizeTrackName(sessionTrackMapping[session]) === normalizeTrackName(this.tracks);
+        const expectedTrack = sessionTrackMapping[session];
+        if (!expectedTrack) return false;
+        return normalizeTrackName(expectedTrack) === normalizeTrackName(this.tracks);
       },
       message: props => `Session ${props.value} is not valid for track ${this.tracks}`
     }

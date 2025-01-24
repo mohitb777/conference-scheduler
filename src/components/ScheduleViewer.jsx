@@ -183,7 +183,7 @@ const ScheduleViewer = () => {
       // Find first available slot that matches the track
       const firstAvailable = availableSlots.find(slot => {
         const expectedTrack = sessionTrackMapping[slot.session];
-        return slot.isAvailable && expectedTrack === scheduleData.schedule.tracks;
+        return slot.isAvailable && normalizeTrackName(expectedTrack) === normalizeTrackName(scheduleData.schedule.tracks);
       });
       
       if (!firstAvailable) {
