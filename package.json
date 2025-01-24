@@ -31,22 +31,22 @@
     "react-select": "^5.9.0",
     "rimraf": "^6.0.1",
     "semver": "^7.5.4",
-    "shell-quote": "^1.7.3",
-    "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^5.0.12"
+    "shell-quote": "^1.7.3"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.5",
     "@eslint/js": "^9.17.0",
     "@types/react": "^18.3.17",
     "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.18.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "postcss": "^8.4.31",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "vite": "^5.0.12"
   },
   "overrides": {
     "semver": "^7.5.4",
