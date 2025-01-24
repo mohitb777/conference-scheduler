@@ -17,7 +17,26 @@ router.use((req, res, next) => {
   next();
 });
 
-// Static routes first
+// Specific routes first
+router.post('/save', 
+  validateSchedule,
+  async (req, res) => {
+    try {
+      console.log('Received schedule data:', req.body);
+      const scheduleData = req.body;
+      const schedule = new Schedule(scheduleData);
+      await schedule.save();
+      res.status(201).json(schedule);
+    } catch (error) {
+      console.error('Error saving schedule:', error);
+      res.status(500).json({ 
+        message: 'Error saving schedule', 
+        error: error.message 
+      });
+    }
+  }
+);
+
 router.get('/latest', async (req, res) => {
   try {
     const schedule = await Schedule.findOne().sort({ _id: -1 });
@@ -40,12 +59,33 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// Get all tracks - move before dynamic route
 router.get('/tracks', async (req, res) => {
   try {
     const tracks = await Schedule.distinct('track');
     res.json(tracks);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Dynamic route last
+router.get('/:id', async (req, res) => {
+  if (req.params.id === 'save') {
+    return res.status(400).json({ message: 'Invalid ID' });
+  }
+  try {
+    const schedule = await Schedule.findById(req.params.id);
+    if (!schedule) {
+      return res.status(404).json({ message: 'Schedule not found' });
+    }
+    res.status(200).json(schedule);
+  } catch (error) {
+    console.error('Error fetching schedule:', error);
+    res.status(500).json({ 
+      message: 'Error fetching schedule', 
+      error: error.message 
+    });
   }
 });
 
@@ -72,46 +112,6 @@ router.get('/papers/:track', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
-// Dynamic route last
-router.get('/:id', async (req, res) => {
-  if (req.params.id === 'save') {
-    return res.status(400).json({ message: 'Invalid ID' });
-  }
-  try {
-    const schedule = await Schedule.findById(req.params.id);
-    if (!schedule) {
-      return res.status(404).json({ message: 'Schedule not found' });
-    }
-    res.status(200).json(schedule);
-  } catch (error) {
-    console.error('Error fetching schedule:', error);
-    res.status(500).json({ 
-      message: 'Error fetching schedule', 
-      error: error.message 
-    });
-  }
-});
-
-// Specific routes first
-router.post('/save', 
-  validateSchedule,
-  async (req, res) => {
-    try {
-      console.log('Received schedule data:', req.body);
-      const scheduleData = req.body;
-      const schedule = new Schedule(scheduleData);
-      await schedule.save();
-      res.status(201).json(schedule);
-    } catch (error) {
-      console.error('Error saving schedule:', error);
-      res.status(500).json({ 
-        message: 'Error saving schedule', 
-        error: error.message 
-      });
-    }
-  }
-);
 
 // Assign schedule to a paper
 router.post('/assign', async (req, res) => {
