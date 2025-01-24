@@ -28,7 +28,8 @@ const scheduleSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function(track) {
-        return track === sessionTrackMapping[this.sessions];
+        const normalizeString = str => str?.trim().toLowerCase().replace(/\s+/g, ' ');
+        return normalizeString(track) === normalizeString(sessionTrackMapping[this.sessions]);
       },
       message: props => `Track ${props.value} is not valid for session ${this.sessions}`
     }
@@ -59,10 +60,10 @@ const scheduleSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function(session) {
-        const normalizeTrackName = str => str?.trim().toLowerCase();
+        const normalizeString = str => str?.trim().toLowerCase().replace(/\s+/g, ' ');
         const expectedTrack = sessionTrackMapping[session];
         if (!expectedTrack) return false;
-        return normalizeTrackName(expectedTrack) === normalizeTrackName(this.tracks);
+        return normalizeString(expectedTrack) === normalizeString(this.tracks);
       },
       message: props => `Session ${props.value} is not valid for track ${this.tracks}`
     }

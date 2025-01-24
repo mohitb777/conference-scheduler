@@ -263,18 +263,33 @@ const AdminSetupPage = () => {
         return;
       }
 
-      const scheduleData = selectedPapers.map(paper => ({
-        paperId: paper.paperId,
-        email: paper.email,
-        contact: paper.contact,
-        title: paper.title,
-        mode: paper.mode.charAt(0).toUpperCase() + paper.mode.slice(1).toLowerCase(),
-        tracks: paper.tracks,
-        date: paper.date,
-        timeSlots: paper.timeSlots,
-        sessions: paper.sessions,
-        venue: sessionVenueMapping[paper.sessions]
-      }));
+      // Add debugging
+      console.log('Selected papers before mapping:', selectedPapers);
+
+      const scheduleData = selectedPapers.map(paper => {
+        const mappedData = {
+          paperId: paper.paperId,
+          email: paper.email,
+          contact: paper.contact,
+          title: paper.title,
+          mode: paper.mode.charAt(0).toUpperCase() + paper.mode.slice(1).toLowerCase(),
+          tracks: paper.tracks.trim(),  // Ensure tracks is trimmed
+          date: paper.date,
+          timeSlots: paper.timeSlots,
+          sessions: paper.sessions,
+          venue: sessionVenueMapping[paper.sessions]
+        };
+        
+        // Debug log for each paper
+        console.log('Mapped schedule data:', {
+          paperId: mappedData.paperId,
+          tracks: mappedData.tracks,
+          sessions: mappedData.sessions,
+          expectedTrack: sessionTrackMapping[mappedData.sessions]
+        });
+        
+        return mappedData;
+      });
 
       const response = await fetch(`${API_BASE_URL}/schedule/save`, {
         method: 'POST',
