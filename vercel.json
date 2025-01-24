@@ -13,27 +13,32 @@
   "routes": [
     {
       "src": "^/assets/(.*)",
-      "headers": {  
-        "cache-control": "public, max-age=31536000, immutable"
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "application/javascript; charset=utf-8"
       },
       "dest": "/assets/$1"
     },
     {
-      "src": "^/(.+\\.[a-zA-Z0-9]+)$",
+      "src": "^/.*\\.js$",
+      "headers": {
+        "content-type": "application/javascript; charset=utf-8"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/.*\\.(css|json|map)$",
       "headers": {
         "cache-control": "public, max-age=31536000, immutable"
       },
-      "dest": "/$1"
+      "continue": true
     },
     {
       "handle": "filesystem"
     },
     {
       "src": ".*",
-      "dest": "/index.html",
-      "headers": {
-        "cache-control": "public, max-age=0, must-revalidate"
-      }
+      "dest": "/index.html"
     }
   ]
 } 
