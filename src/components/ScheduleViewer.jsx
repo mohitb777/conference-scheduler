@@ -55,7 +55,7 @@ const ScheduleViewer = () => {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app/api/schedule/all', {
+      const response = await fetch(`${API_BASE_URL}/schedule/all`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

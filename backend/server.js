@@ -8,22 +8,22 @@ const scheduleRoutes = require('./routes/scheduleRoutes');
 
 const app = express();
 
-// Use CORS middleware
-app.use(cors({
+const corsOptions = {
   origin: [
     "https://conference-scheduler-frontend10.vercel.app",
-    "https://conference-scheduler-frontend10-2fnce3876.vercel.app",
-    "https://conference-scheduler-frontend10-6yv3eohp8.vercel.app",
     "http://localhost:5173"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
   exposedHeaders: ["Content-Type", "Authorization"],
-  credentials: false  // Changed to false since we're using token-based auth
-}));
+  credentials: true
+};
+
+// Use CORS middleware
+app.use(cors(corsOptions));
 
 // Add OPTIONS preflight handler
-app.options('*', cors());
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 

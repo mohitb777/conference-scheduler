@@ -409,4 +409,16 @@ router.get('/check-conflicts', async (req, res) => {
   }
 });
 
+// Add this at the beginning of the file
+const errorHandler = (err, req, res, next) => {
+  console.error('Schedule route error:', err);
+  res.status(500).json({
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+};
+
+// Add this at the end of the file before module.exports
+router.use(errorHandler);
+
 module.exports = router; 

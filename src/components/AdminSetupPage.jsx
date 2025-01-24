@@ -259,46 +259,24 @@ const AdminSetupPage = () => {
         return;
       }
 
-      const scheduleData = selectedPapers.map(paper => {
-        const availableSessions = getSessionsForTrack(paper.tracks);
-        
-        if (availableSessions.length === 0) {
-          throw new Error(`No valid sessions found for paper ${paper.paperId}'s track`);
-        }
+      const scheduleData = selectedPapers.map(paper => ({
+        paperId: paper.paperId,
+        email: paper.email,
+        contact: paper.contact,
+        title: paper.title,
+        mode: paper.mode.charAt(0).toUpperCase() + paper.mode.slice(1).toLowerCase(),
+        tracks: paper.tracks,
+        date: paper.date,
+        timeSlots: paper.timeSlots,
+        sessions: paper.sessions,
+        venue: sessionVenueMapping[paper.sessions]
+      }));
 
-        // Get the first available session
-        const session = paper.sessions || availableSessions[0];
-        const timeSlot = getTimeSlotForSession(session);
-        
-        if (!timeSlot) {
-          throw new Error(`No valid time slot found for session ${session}`);
-        }
-
-        // Fix date calculation based on session number
-        const sessionNumber = parseInt(session.split(' ')[1]);
-        const date = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
-
-        // Ensure mode is capitalized to match enum values
-        const mode = paper.mode.charAt(0).toUpperCase() + paper.mode.slice(1).toLowerCase();
-
-        return {
-          paperId: paper.paperId,
-          email: paper.email,
-          contact: paper.contact,
-          title: paper.title,
-          mode: mode, // Now properly capitalized
-          tracks: paper.tracks,
-          date: date,
-          timeSlots: timeSlot,
-          sessions: session,
-          venue: sessionVenueMapping[session]
-        };
-      });
-
-      const response = await fetch('/api/schedule/save', {
+      const response = await fetch(`${API_BASE_URL}/schedule/save`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-auth-token': localStorage.getItem('token')
         },
         body: JSON.stringify(scheduleData)
       });
