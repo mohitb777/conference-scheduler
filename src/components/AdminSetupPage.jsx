@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { sessionVenueMapping } from '../constants/scheduleConstants';
+import { API_BASE_URL } from '../config/api';
 
 const AdminSetupPage = () => {
   const navigate = useNavigate();
@@ -365,7 +366,7 @@ const AdminSetupPage = () => {
         return;
       }
 
-      const response = await fetch('https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app/api/schedule/send-emails', {
+      const response = await fetch(`${API_BASE_URL}/schedule/send-emails`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

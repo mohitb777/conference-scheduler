@@ -1,7 +1,8 @@
-const API_BASE_URL = 'https://conference-scheduler-i7u3wxsti-mohits-projects-a2c7dc06.vercel.app/api';
+const API_BASE_URL = 'https://conference-scheduler-bay.vercel.app/api';
 
 export const API_URLS = {
   LOGIN: `${API_BASE_URL}/users/login`,
+  REGISTER: `${API_BASE_URL}/users/register`,
   SCHEDULE: {
     ALL: `${API_BASE_URL}/schedule/all`,
     SEND_EMAILS: `${API_BASE_URL}/schedule/send-emails`,
