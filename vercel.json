@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "^/assets/(.*)",
-      "headers": {
+      "headers": {  
         "cache-control": "public, max-age=31536000, immutable"
       },
       "dest": "/assets/$1"
