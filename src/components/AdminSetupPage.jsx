@@ -272,7 +272,7 @@ const AdminSetupPage = () => {
         venue: sessionVenueMapping[paper.sessions]
       }));
 
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.SAVE}`, {
+      const response = await fetch(`${API_BASE_URL}/schedule/save`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

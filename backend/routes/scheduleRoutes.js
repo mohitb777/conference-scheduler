@@ -10,10 +10,9 @@ const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const { sessionVenueMapping } = require('../utils/mappings');
 
-// Debug middleware
+// Debug middleware to log all requests
 router.use((req, res, next) => {
-  console.log('Schedule Route:', req.method, req.path);
-  console.log('Request Body:', req.body);
+  console.log('Schedule Route:', req.method, req.path, req.body);
   next();
 });
 
@@ -55,7 +54,7 @@ router.post('/save', validateSchedule, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Save error:', error);
+    console.error('Save schedule error:', error);
     res.status(500).json({ message: error.message });
   }
 });

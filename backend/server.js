@@ -82,6 +82,7 @@ app.use((err, req, res, next) => {
 
 // Add 404 handler
 app.use((req, res) => {
+  console.log('404 Not Found:', req.method, req.url);
   res.status(404).json({ message: 'Route not found' });
 });
 
