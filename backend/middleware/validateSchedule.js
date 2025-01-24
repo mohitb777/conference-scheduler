@@ -2,6 +2,10 @@ const { sessionTrackMapping, sessionTimeSlotMapping } = require('../constants/sc
 const Paper = require('../models/Paper');
 const Schedule = require('../models/Schedule');
 
+const normalizeTrackName = (track) => {
+  return track?.trim().toLowerCase();
+};
+
 const validateSchedule = async (req, res, next) => {
   try {
     const schedules = Array.isArray(req.body) ? req.body : [req.body];
@@ -43,7 +47,7 @@ const validateSchedule = async (req, res, next) => {
 
       // Validate session-track association
       const expectedTrack = sessionTrackMapping[schedule.sessions];
-      if (!expectedTrack || schedule.tracks !== expectedTrack) {
+      if (!expectedTrack || normalizeTrackName(schedule.tracks) !== normalizeTrackName(expectedTrack)) {
         return res.status(400).json({
           message: `Invalid session for track: ${schedule.tracks}`
         });

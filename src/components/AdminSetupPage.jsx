@@ -8,7 +8,7 @@ const AdminSetupPage = () => {
   const navigate = useNavigate();
   const sessionTimeSlotMapping = {
     'Session 1': '2:40 PM - 4:30 PM',
-    'Session 2': '2:40 PM - 4:30 PM',
+    'Session 2': '2:40 PM - 4:30 PM', 
     'Session 3': '2:40 PM - 4:30 PM',
     'Session 4': '2:40 PM - 4:30 PM',
     'Session 5': '2:40 PM - 4:30 PM',
@@ -36,9 +36,13 @@ const AdminSetupPage = () => {
     'Session 10': 'Big Data, Data Science and Engineering, Natural Language Processing'
   };
 
+  const normalizeTrackName = (track) => {
+    return track.trim().toLowerCase();
+  };
+
   const getSessionsForTrack = (track) => {
     return Object.entries(sessionTrackMapping)
-      .filter(([_, sessionTrack]) => sessionTrack === track)
+      .filter(([_, sessionTrack]) => normalizeTrackName(sessionTrack) === normalizeTrackName(track))
       .map(([session]) => session);
   };
 

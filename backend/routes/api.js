@@ -399,7 +399,7 @@ router.post('/schedule/reschedule/:paperId', authMiddleware, async (req, res) =>
 
     // Validate session-track association
     const expectedTrack = sessionTrackMapping[newSession];
-    if (!expectedTrack || schedule.tracks !== expectedTrack) {
+    if (!expectedTrack || normalizeTrackName(schedule.tracks) !== normalizeTrackName(expectedTrack)) {
       return res.status(400).json({
         message: `Invalid session for track: ${schedule.tracks}`
       });

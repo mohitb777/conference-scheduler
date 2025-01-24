@@ -12,6 +12,14 @@
   ],
   "routes": [
     {
+      "src": "^/assets/(.*)\\.css$",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "text/css; charset=utf-8"
+      },
+      "dest": "/assets/$1.css"
+    },
+    {
       "src": "^/assets/(.*)",
       "headers": {
         "cache-control": "public, max-age=31536000, immutable",
@@ -29,7 +37,8 @@
     {
       "src": "^/.*\\.(css|json|map)$",
       "headers": {
-        "cache-control": "public, max-age=31536000, immutable"
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "text/css; charset=utf-8"
       },
       "continue": true
     },
@@ -39,7 +48,6 @@
     {
       "src": ".*",
       "dest": "/index.html"
-      
     }
   ]
 } 
