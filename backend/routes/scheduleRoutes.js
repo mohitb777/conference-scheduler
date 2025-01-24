@@ -36,38 +36,35 @@ router.post('/save', validateSchedule, async (req, res) => {
   try {
     const schedules = Array.isArray(req.body) ? req.body : [req.body];
     
-    // Check for existing schedules
-    for (const schedule of schedules) {
-      const existingSchedule = await Schedule.findOne({ paperId: schedule.paperId });
-      if (existingSchedule) {
-        return res.status(400).json({
-          message: `Paper ${schedule.paperId} is already scheduled`
-        });
-      }
-    }
-
-    // Check session capacity
-    for (const schedule of schedules) {
-      const sessionCount = await Schedule.countDocuments({
-        date: schedule.date,
-        sessions: schedule.sessions,
-        timeSlots: schedule.timeSlots
-      });
-      
-      if (sessionCount >= 15) {
-        return res.status(400).json({
-          message: `Session ${schedule.sessions} on ${schedule.date} at ${schedule.timeSlots} is full (maximum 15 papers)`
-        });
-      }
-    }
-
+    // Validation is already handled by validateSchedule middleware
     const savedSchedules = await Schedule.insertMany(schedules);
+    
+    // Send confirmation emails
+    for (const schedule of savedSchedules) {
+      try {
+        const paper = await Paper.findOne({ paperId: schedule.paperId });
+        if (paper) {
+          const token = await sendScheduleEmail({
+            ...schedule.toObject(),
+            email: paper.email,
+            title: paper.title,
+            authors: paper.authors,
+            paperId: paper.paperId
+          });
+          
+          schedule.confirmationToken = token;
+          schedule.confirmationExpires = new Date(Date.now() + 48 * 60 * 60 * 1000);
+          await schedule.save();
+        }
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+      }
+    }
     
     res.status(201).json({
       message: 'Schedules saved successfully',
       schedules: savedSchedules
     });
-
   } catch (error) {
     console.error('Save schedule error:', error);
     res.status(500).json({ message: error.message });
