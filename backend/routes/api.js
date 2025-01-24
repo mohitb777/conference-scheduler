@@ -11,47 +11,46 @@ const jwt = require('jsonwebtoken');
 const { sendScheduleEmail } = require('../utils/emailService');
 const { sessionTrackMapping, sessionTimeSlotMapping } = require('../constants/scheduleConstants');
 
-// // Then use it in routes
-// router.post('/schedule/save', validateSchedule, async (req, res) => {
-//   try {
-//     const schedules = Array.isArray(req.body) ? req.body : [req.body];
+router.post('/schedule/save', validateSchedule, async (req, res) => {
+  try {
+    const schedules = Array.isArray(req.body) ? req.body : [req.body];
     
-//     // Check for existing schedules
-//     for (const schedule of schedules) {
-//       const existingSchedule = await Schedule.findOne({ paperId: schedule.paperId });
-//       if (existingSchedule) {
-//         return res.status(400).json({
-//           message: `Paper ${schedule.paperId} is already scheduled`
-//         });
-//       }
-//     }
+    // Check for existing schedules
+    for (const schedule of schedules) {
+      const existingSchedule = await Schedule.findOne({ paperId: schedule.paperId });
+      if (existingSchedule) {
+        return res.status(400).json({
+          message: `Paper ${schedule.paperId} is already scheduled`
+        });
+      }
+    }
 
-//     // Check session capacity
-//     for (const schedule of schedules) {
-//       const sessionCount = await Schedule.countDocuments({
-//         date: schedule.date,
-//         sessions: schedule.sessions,
-//         timeSlots: schedule.timeSlots
-//       });
+    // Check session capacity
+    for (const schedule of schedules) {
+      const sessionCount = await Schedule.countDocuments({
+        date: schedule.date,
+        sessions: schedule.sessions,
+        timeSlots: schedule.timeSlots
+      });
       
-//       if (sessionCount >= 15) {
-//         return res.status(400).json({
-//           message: `Session ${schedule.sessions} on ${schedule.date} at ${schedule.timeSlots} is full (maximum 15 papers)`
-//         });
-//       }
-//     }
+      if (sessionCount >= 15) {
+        return res.status(400).json({
+          message: `Session ${schedule.sessions} on ${schedule.date} at ${schedule.timeSlots} is full (maximum 15 papers)`
+        });
+      }
+    }
 
-//     const savedSchedules = await Schedule.insertMany(schedules);
+    const savedSchedules = await Schedule.insertMany(schedules);
     
-//     res.status(201).json({
-//       message: 'Schedules saved successfully',
-//       schedules: savedSchedules
-//     });
+    res.status(201).json({
+      message: 'Schedules saved successfully',
+      schedules: savedSchedules
+    });
 
-//   } catch (error) {
-//     console.error('Save error:', error);
-//     res.status(500).json({ message: error.message });
-//   }
+  } catch (error) {
+    console.error('Save error:', error);
+    res.status(500).json({ message: error.message });
+  }
 });
 
 // Get all papers
@@ -494,7 +493,7 @@ router.post('/auth/logout', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/api/users/login', async (req, res) => {
+router.post('/users/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -821,8 +820,4 @@ router.get('/', (req, res) => {
   res.json({ message: 'Conference Scheduler API is running' });
 });
 
-// router.use('*', (req, res) => {
-//   res.status(404).json({ message: 'Route not found' });
-// });
-
-module.exports = router; 
+module.exports = router;
