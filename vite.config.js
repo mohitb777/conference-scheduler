@@ -5,11 +5,24 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.svg'],
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+        assetFileNames: 'assets/[name].[hash].[ext]',
+        chunkFileNames: 'assets/[name].[hash].js',
+        entryFileNames: 'assets/[name].[hash].js'
+      }
+    }
+  },
   server: {
     port: 5173,
     proxy: {
       '/api': {
-       target: 'https://conference-scheduler-ns0z4zt2b-mohits-projects-a2c7dc06.vercel.app.app',
+        target: 'https://conference-scheduler-bay.vercel.app',
         changeOrigin: true,
         secure: false
       }
