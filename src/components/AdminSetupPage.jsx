@@ -454,11 +454,31 @@ const AdminSetupPage = () => {
                         type="checkbox"
                         checked={selectedSessions.includes(session)}
                         onChange={(e) => {
+                          const updatedRows = [...selectedRows];
                           if (e.target.checked) {
                             setSelectedSessions([...selectedSessions, session]);
+                            // Update the first row with the selected session
+                            if (updatedRows[0]) {
+                              updatedRows[0] = {
+                                ...updatedRows[0],
+                                sessions: session,
+                                timeSlots: getTimeSlotForSession(session),
+                                venue: sessionVenueMapping[session]
+                              };
+                            }
                           } else {
                             setSelectedSessions(selectedSessions.filter(s => s !== session));
+                            // Clear the session from the first row if it matches
+                            if (updatedRows[0] && updatedRows[0].sessions === session) {
+                              updatedRows[0] = {
+                                ...updatedRows[0],
+                                sessions: '',
+                                timeSlots: '',
+                                venue: ''
+                              };
+                            }
                           }
+                          setSelectedRows(updatedRows);
                         }}
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                       />
