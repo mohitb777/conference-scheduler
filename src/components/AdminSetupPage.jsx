@@ -454,31 +454,37 @@ const AdminSetupPage = () => {
                         type="checkbox"
                         checked={selectedSessions.includes(session)}
                         onChange={(e) => {
-                          const updatedRows = [...selectedRows];
                           if (e.target.checked) {
                             setSelectedSessions([...selectedSessions, session]);
-                            // Update the first row with the selected session
-                            if (updatedRows[0]) {
-                              updatedRows[0] = {
-                                ...updatedRows[0],
-                                sessions: session,
-                                timeSlots: getTimeSlotForSession(session),
-                                venue: sessionVenueMapping[session]
-                              };
-                            }
+                            // Update all selected rows with the session information
+                            const updatedRows = selectedRows.map(row => {
+                              if (row.paperId) {
+                                return {
+                                  ...row,
+                                  sessions: session,
+                                  timeSlots: getTimeSlotForSession(session),
+                                  venue: sessionVenueMapping[session]
+                                };
+                              }
+                              return row;
+                            });
+                            setSelectedRows(updatedRows);
                           } else {
                             setSelectedSessions(selectedSessions.filter(s => s !== session));
-                            // Clear the session from the first row if it matches
-                            if (updatedRows[0] && updatedRows[0].sessions === session) {
-                              updatedRows[0] = {
-                                ...updatedRows[0],
-                                sessions: '',
-                                timeSlots: '',
-                                venue: ''
-                              };
-                            }
+                            // Clear the session from all rows that have this session
+                            const updatedRows = selectedRows.map(row => {
+                              if (row.sessions === session) {
+                                return {
+                                  ...row,
+                                  sessions: '',
+                                  timeSlots: '',
+                                  venue: ''
+                                };
+                              }
+                              return row;
+                            });
+                            setSelectedRows(updatedRows);
                           }
-                          setSelectedRows(updatedRows);
                         }}
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                       />
