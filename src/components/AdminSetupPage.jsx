@@ -454,37 +454,32 @@ const AdminSetupPage = () => {
                         type="checkbox"
                         checked={selectedSessions.includes(session)}
                         onChange={(e) => {
+                          const updatedRows = [...selectedRows];
                           if (e.target.checked) {
                             setSelectedSessions([...selectedSessions, session]);
-                            // Update all selected rows with the session information
-                            const updatedRows = selectedRows.map(row => {
+                            // Update all selected papers with the same session information
+                            updatedRows.forEach(row => {
                               if (row.paperId) {
-                                return {
-                                  ...row,
-                                  sessions: session,
-                                  timeSlots: getTimeSlotForSession(session),
-                                  venue: sessionVenueMapping[session]
-                                };
+                                const sessionDate = parseInt(session.split(' ')[1]) <= 5 ? '2025-02-07' : '2025-02-08';
+                                row.sessions = session;
+                                row.timeSlots = sessionTimeSlotMapping[session];
+                                row.venue = sessionVenueMapping[session];
+                                row.date = sessionDate;
                               }
-                              return row;
                             });
-                            setSelectedRows(updatedRows);
                           } else {
                             setSelectedSessions(selectedSessions.filter(s => s !== session));
-                            // Clear the session from all rows that have this session
-                            const updatedRows = selectedRows.map(row => {
+                            // Clear the session from papers that had this session
+                            updatedRows.forEach(row => {
                               if (row.sessions === session) {
-                                return {
-                                  ...row,
-                                  sessions: '',
-                                  timeSlots: '',
-                                  venue: ''
-                                };
+                                row.sessions = '';
+                                row.timeSlots = '';
+                                row.venue = '';
+                                row.date = '';
                               }
-                              return row;
                             });
-                            setSelectedRows(updatedRows);
                           }
+                          setSelectedRows(updatedRows);
                         }}
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                       />
