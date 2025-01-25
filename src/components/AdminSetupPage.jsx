@@ -240,19 +240,23 @@ const AdminSetupPage = () => {
       const date = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
       const venue = sessionVenueMapping[selectedSession];
 
+      // Validate if the session matches the paper's track
+      const expectedTrack = sessionTrackMapping[selectedSession];
+      if (!expectedTrack || normalizeTrackName(expectedTrack) !== normalizeTrackName(currentPaper.tracks)) {
+        toast.error(`Invalid session for track: ${currentPaper.tracks}`);
+        return;
+      }
+
       const updatedRows = [...selectedRows];
       updatedRows[index] = {
         ...currentPaper,
         sessions: selectedSession,
         timeSlots: timeSlot,
         date: date,
-        venue: venue,
-        tracks: currentPaper.tracks // Ensure tracks are preserved
+        venue: venue
       };
 
-      setSelectedRows(updatedRows);
-      
-      // Force update to trigger re-render
+      // Update state and force re-render
       setSelectedRows([...updatedRows]);
     } catch (error) {
       console.error('Error in handleSessionChange:', error);

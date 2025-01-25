@@ -19,17 +19,14 @@ const validateSchedule = async (req, res, next) => {
       });
     }
 
-    // Check if any papers are already scheduled
     for (const schedule of schedules) {
-      const existingSchedule = await Schedule.findOne({ paperId: schedule.paperId });
-      if (existingSchedule) {
+      // Basic validation for required fields
+      if (!schedule.sessions || !schedule.timeSlots || !schedule.date) {
         return res.status(400).json({
-          message: `Paper ${schedule.paperId} is already scheduled`
+          message: `Please select sessions for paper ${schedule.paperId}`
         });
       }
-    }
 
-    for (const schedule of schedules) {
       // Validate paper exists
       const paper = await Paper.findOne({ paperId: schedule.paperId });
       if (!paper) {
@@ -38,11 +35,34 @@ const validateSchedule = async (req, res, next) => {
         });
       }
 
+      // Check if paper is already scheduled
+      const existingSchedule = await Schedule.findOne({ paperId: schedule.paperId });
+      if (existingSchedule) {
+        return res.status(400).json({
+          message: `Paper ${schedule.paperId} is already scheduled`
+        });
+      }
+
       // Validate session exists and matches track
       const expectedTrack = sessionTrackMapping[schedule.sessions];
       if (!expectedTrack) {
         return res.status(400).json({
           message: `Invalid session: ${schedule.sessions}`
+        });
+      }
+
+      // Validate track matching
+      if (normalizeTrackName(paper.tracks) !== normalizeTrackName(expectedTrack)) {
+        return res.status(400).json({
+          message: `Session ${schedule.sessions} can only be assigned to papers from track: ${expectedTrack}`
+        });
+      }
+
+      // Validate time slot matches session
+      const expectedTimeSlot = sessionTimeSlotMapping[schedule.sessions];
+      if (schedule.timeSlots !== expectedTimeSlot) {
+        return res.status(400).json({
+          message: `Invalid time slot for session ${schedule.sessions}`
         });
       }
 
