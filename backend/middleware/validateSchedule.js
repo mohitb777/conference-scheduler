@@ -11,21 +11,18 @@ const validateSchedule = async (req, res, next) => {
     const schedules = Array.isArray(req.body) ? req.body : [req.body];
     console.log('Validating schedules:', schedules);
     
-    // Check for duplicate paperIds
-    const paperIds = schedules.map(s => s.paperId);
-    const uniquePaperIds = new Set(paperIds);
-    if (paperIds.length !== uniquePaperIds.size) {
-      return res.status(400).json({
-        message: 'Duplicate paper IDs detected. Each paper can only be scheduled once.'
-      });
-    }
-
     for (const schedule of schedules) {
-      console.log('Validating schedule:', schedule);
-      
+      // Get paper details first
+      const paper = await Paper.findOne({ paperId: schedule.paperId });
+      if (!paper) {
+        return res.status(404).json({
+          message: `Paper ${schedule.paperId} not found`
+        });
+      }
+
       // Basic validation for required fields
       if (!schedule.sessions || !schedule.timeSlots || !schedule.date || !schedule.venue) {
-        console.log('Missing required fields:', {
+        console.log('Missing fields:', {
           sessions: !schedule.sessions,
           timeSlots: !schedule.timeSlots,
           date: !schedule.date,
@@ -36,60 +33,26 @@ const validateSchedule = async (req, res, next) => {
         });
       }
 
-      // Get paper details
-      const paper = await Paper.findOne({ paperId: schedule.paperId });
-      console.log('Found paper:', paper);
-      
-      if (!paper) {
-        console.log('Paper not found:', schedule.paperId);
-        return res.status(404).json({
-          message: `Paper ${schedule.paperId} not found`
-        });
-      }
-
-      // Check if paper is already scheduled
-      const existingSchedule = await Schedule.findOne({ paperId: schedule.paperId });
-      if (existingSchedule) {
-        return res.status(400).json({
-          message: `Paper ${schedule.paperId} is already scheduled`
-        });
-      }
-
       // Validate session exists and matches track
       const expectedTrack = sessionTrackMapping[schedule.sessions];
-      console.log('Expected track:', expectedTrack);
-      console.log('Paper track:', paper.tracks);
-      
-      if (!expectedTrack) {
-        console.log('Invalid session:', schedule.sessions);
-        return res.status(400).json({
-          message: `Invalid session: ${schedule.sessions}`
-        });
-      }
-
-      // Validate track matching
-      if (normalizeTrackName(paper.tracks) !== normalizeTrackName(expectedTrack)) {
+      if (!expectedTrack || normalizeTrackName(paper.tracks) !== normalizeTrackName(expectedTrack)) {
         return res.status(400).json({
           message: `Session ${schedule.sessions} can only be assigned to papers from track: ${expectedTrack}`
         });
       }
 
-      // Validate time slot matches session
-      const expectedTimeSlot = sessionTimeSlotMapping[schedule.sessions];
-      if (schedule.timeSlots !== expectedTimeSlot) {
-        return res.status(400).json({
-          message: `Invalid time slot for session ${schedule.sessions}`
-        });
-      }
+      // Check session capacity
+      const sessionCount = await Schedule.countDocuments({
+        date: schedule.date,
+        sessions: schedule.sessions
+      });
 
-      // Add mode validation
-      if (!['Online', 'Offline'].includes(schedule.mode)) {
-        return res.status(400).json({
-          message: `Invalid mode for paper ${schedule.paperId}. Mode must be 'Online' or 'Offline'`
+      if (sessionCount >= 15) {
+        return res.status(400).json({ 
+          message: `Session ${schedule.sessions} on ${schedule.date} has reached maximum capacity`
         });
       }
     }
-
     next();
   } catch (error) {
     console.error('Validation error:', error);
@@ -97,4 +60,4 @@ const validateSchedule = async (req, res, next) => {
   }
 };
 
-module.exports = validateSchedule; 
+module.exports = validateSchedule;
