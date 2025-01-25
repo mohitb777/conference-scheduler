@@ -80,20 +80,6 @@ const validateSchedule = async (req, res, next) => {
           message: `Invalid time slot for session ${schedule.sessions}`
         });
       }
-
-      // Check if slot is already taken
-      const existingSlot = await Schedule.findOne({
-        date: schedule.date,
-        timeSlots: schedule.timeSlots,
-        sessions: schedule.sessions,
-        paperId: { $ne: schedule.paperId }
-      });
-
-      if (existingSlot) {
-        return res.status(400).json({
-          message: `Time slot ${schedule.timeSlots} is already taken in session ${schedule.sessions}`
-        });
-      }
     }
 
     next();
