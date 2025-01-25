@@ -16,74 +16,29 @@ router.post('/schedule/save', [authMiddleware, validateSchedule], async (req, re
     const schedules = Array.isArray(req.body) ? req.body : [req.body];
     
     for (const schedule of schedules) {
-      // Validate session-track association
-      const expectedTrack = sessionTrackMapping[schedule.sessions];
       const paper = await Paper.findOne({ paperId: schedule.paperId });
       
-      if (!paper) {
-        return res.status(404).json({ message: `Paper ${schedule.paperId} not found` });
-      }
-
-      // Check session capacity
-      const sessionCount = await Schedule.countDocuments({
-        date: schedule.date,
+      // Create new schedule with all required fields
+      const newSchedule = new Schedule({
+        paperId: schedule.paperId,
+        email: paper.email,
+        contact: paper.contact,
+        title: paper.title,
+        mode: paper.mode,
+        tracks: paper.tracks,
         sessions: schedule.sessions,
-        paperId: { $ne: schedule.paperId }
-      });
-      
-      if (sessionCount >= 15) {
-        return res.status(400).json({
-          message: `Session ${schedule.sessions} on ${schedule.date} has reached maximum capacity`
-        });
-      }
-
-      // Check if slot is already taken
-      const existingSlot = await Schedule.findOne({
-        date: schedule.date,
         timeSlots: schedule.timeSlots,
-        sessions: schedule.sessions,
-        paperId: { $ne: schedule.paperId }
+        date: schedule.date,
+        venue: schedule.venue
       });
 
-      if (existingSlot) {
-        return res.status(400).json({
-          message: `Time slot ${schedule.timeSlots} is already taken in session ${schedule.sessions}`
-        });
-      }
+      await newSchedule.save();
     }
 
-    const savedSchedules = await Schedule.insertMany(schedules);
-    
-    // Send confirmation emails
-    for (const schedule of savedSchedules) {
-      try {
-        const paper = await Paper.findOne({ paperId: schedule.paperId });
-        if (paper) {
-          const token = await sendScheduleEmail({
-            ...schedule.toObject(),
-            email: paper.email,
-            title: paper.title,
-            authors: paper.authors,
-            paperId: paper.paperId
-          });
-          
-          await Schedule.findByIdAndUpdate(schedule._id, {
-            confirmationToken: token,
-            confirmationExpires: new Date(Date.now() + 48 * 60 * 60 * 1000)
-          });
-        }
-      } catch (emailError) {
-        console.error('Failed to send confirmation email:', emailError);
-      }
-    }
-
-    return res.status(201).json({
-      message: 'Schedules saved successfully',
-      schedules: savedSchedules
-    });
+    res.json({ message: 'Schedule saved successfully' });
   } catch (error) {
     console.error('Save schedule error:', error);
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 });
 

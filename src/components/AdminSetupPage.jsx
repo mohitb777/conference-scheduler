@@ -470,10 +470,30 @@ const AdminSetupPage = () => {
                               if (row.paperId) {
                                 const sessionNumber = parseInt(session.split(' ')[1]);
                                 const sessionDate = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
-                                row.sessions = session;
-                                row.timeSlots = sessionTimeSlotMapping[session];
-                                row.venue = sessionVenueMapping[session];
-                                row.date = sessionDate;
+                                const timeSlot = sessionTimeSlotMapping[session];
+                                const venue = sessionVenueMapping[session];
+                                const expectedTrack = sessionTrackMapping[session];
+
+                                // Only update if track matches
+                                if (normalizeTrackName(row.tracks) === normalizeTrackName(expectedTrack)) {
+                                  row.sessions = session;
+                                  row.timeSlots = timeSlot;
+                                  row.venue = venue;
+                                  row.date = sessionDate;
+                                  console.log('Updated row:', {
+                                    paperId: row.paperId,
+                                    sessions: session,
+                                    timeSlots: timeSlot,
+                                    venue: venue,
+                                    date: sessionDate,
+                                    tracks: row.tracks
+                                  });
+                                } else {
+                                  console.log('Track mismatch:', {
+                                    paperTrack: row.tracks,
+                                    sessionTrack: expectedTrack
+                                  });
+                                }
                               }
                             });
                           } else {

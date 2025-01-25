@@ -81,6 +81,13 @@ const validateSchedule = async (req, res, next) => {
           message: `Invalid time slot for session ${schedule.sessions}`
         });
       }
+
+      // Add mode validation
+      if (!['Online', 'Offline'].includes(schedule.mode)) {
+        return res.status(400).json({
+          message: `Invalid mode for paper ${schedule.paperId}. Mode must be 'Online' or 'Offline'`
+        });
+      }
     }
 
     next();
