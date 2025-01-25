@@ -100,6 +100,9 @@ const AdminSetupPage = () => {
 
   const handlePaperSelect = async (index, paperId) => {
     try {
+      // Skip if no paper ID selected
+      if (!paperId) return;
+
       const scheduleResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.CHECK(paperId)}`);
       const scheduleData = await scheduleResponse.json();     
       if (scheduleData.isScheduled) {
@@ -108,11 +111,12 @@ const AdminSetupPage = () => {
       }
 
       const paper = papers.find(p => p.paperId.toString() === paperId.toString());
-      if (!paper) return;
+      if (!paper) {
+        toast.error('Paper not found');
+        return;
+      }
 
-      // Add paper to selectedPaperIds
-      setSelectedPaperIds(prev => [...prev, paperId]);
-
+      // Update the current row with paper details
       const updatedRows = [...selectedRows];
       updatedRows[index] = {
         ...paper,
@@ -122,36 +126,19 @@ const AdminSetupPage = () => {
       };
       setSelectedRows(updatedRows);
 
+      // Add to selectedPaperIds after successful update
+      setSelectedPaperIds(prev => [...prev, paperId]);
+
       // Get available sessions for this track
       const availableSessions = Object.entries(sessionTrackMapping)
         .filter(([_, trackName]) => normalizeTrackName(trackName) === normalizeTrackName(paper.tracks))
         .map(([session]) => session);
       
-      // Automatically select sessions that match the track
+      // Update selected sessions
       setSelectedSessions(prev => [...new Set([...prev, ...availableSessions])]);
 
-      // Update all selected papers with matching sessions
-      const updatedRowsWithSessions = selectedRows.map(row => {
-        if (selectedPaperIds.includes(row.paperId)) {
-          const matchingSession = availableSessions.find(session => {
-            const sessionTrack = sessionTrackMapping[session];
-            return normalizeTrackName(row.tracks) === normalizeTrackName(sessionTrack);
-          });
-
-          if (matchingSession) {
-            const sessionNumber = parseInt(matchingSession.split(' ')[1]);
-            return {
-              ...row,
-              sessions: matchingSession,
-              timeSlots: sessionTimeSlotMapping[matchingSession],
-              date: sessionNumber <= 5 ? '2025-02-07' : '2025-02-08',
-              venue: sessionVenueMapping[matchingSession]
-            };
-          }
-        }
-        return row;
-      });
-      setSelectedRows(updatedRowsWithSessions);
+      console.log('Paper selected:', paper);
+      console.log('Available sessions:', availableSessions);
     } catch (error) {
       console.error('Error selecting paper:', error);
       toast.error('Failed to select paper');
@@ -458,21 +445,18 @@ const AdminSetupPage = () => {
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="border px-4 py-2">
                       <select
-                        value={row.paperId}
+                        value={row.paperId || ''}
                         onChange={(e) => handlePaperSelect(index, e.target.value)}
                         className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400"
                       >
                         <option value="">Select Paper ID</option>
-                        {(row.tracks ? papers.filter(p => 
-                          p.tracks === row.tracks && 
-                          !selectedRows.some(r => r.paperId === p.paperId && r !== row)
-                        ) : papers.filter(p => 
-                          !selectedRows.some(r => r.paperId === p.paperId && r !== row)
-                        )).map(paper => (
-                          <option key={paper.paperId} value={paper.paperId}>
-                            {paper.paperId}
-                          </option>
-                        ))}
+                        {papers
+                          .filter(p => !selectedRows.some(r => r.paperId === p.paperId && r !== row))
+                          .map(paper => (
+                            <option key={paper.paperId} value={paper.paperId}>
+                              {paper.paperId}
+                            </option>
+                          ))}
                       </select>
                     </td>
                     <td className="border px-4 py-2">
