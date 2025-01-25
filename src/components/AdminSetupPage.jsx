@@ -289,21 +289,14 @@ const AdminSetupPage = () => {
         }
       }
 
-      // Filter out unnecessary fields before sending
-      const scheduleData = selectedPapers.map(({ 
-        paperId, 
-        tracks, 
-        sessions, 
-        timeSlots, 
-        date, 
-        venue 
-      }) => ({
-        paperId,
-        tracks,
-        sessions,
-        timeSlots,
-        date,
-        venue
+      // Filter out unnecessary fields and include tracks
+      const scheduleData = selectedPapers.map(paper => ({
+        paperId: paper.paperId,
+        tracks: paper.tracks,
+        sessions: paper.sessions,
+        timeSlots: paper.timeSlots,
+        date: paper.date,
+        venue: paper.venue
       }));
 
       console.log('Schedule Data to be sent:', scheduleData);
@@ -317,15 +310,27 @@ const AdminSetupPage = () => {
         body: JSON.stringify(scheduleData)
       });
 
-      const data = await response.json();
-      console.log('Response from server:', data);
-
+      const result = await response.json();
+      
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to save schedule');
+        throw new Error(result.message || 'Failed to save schedule');
       }
 
       toast.success('Schedule saved successfully');
-      setTimeout(() => window.location.reload(), 1500);
+      // Clear selection after successful save
+      setSelectedRows([{
+        paperId: '',
+        email: '',
+        contact: '',
+        title: '',
+        mode: '',
+        tracks: '',
+        date: '',
+        timeSlots: '',
+        sessions: '',
+        venue: ''
+      }]);
+      setSelectedSessions([]);
     } catch (error) {
       console.error('Schedule save error:', error);
       toast.error(error.message || 'Failed to save schedule');
@@ -465,9 +470,12 @@ const AdminSetupPage = () => {
                               if (row.paperId) {
                                 const sessionNumber = parseInt(session.split(' ')[1]);
                                 const sessionDate = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
+                                const timeSlot = sessionTimeSlotMapping[session];
+                                const venue = sessionVenueMapping[session];
+                                
                                 row.sessions = session;
-                                row.timeSlots = sessionTimeSlotMapping[session];
-                                row.venue = sessionVenueMapping[session];
+                                row.timeSlots = timeSlot;
+                                row.venue = venue;
                                 row.date = sessionDate;
                                 console.log('Updated row:', row);
                               }
@@ -483,7 +491,6 @@ const AdminSetupPage = () => {
                               }
                             });
                           }
-                          console.log('Final updatedRows:', updatedRows);
                           setSelectedRows([...updatedRows]);
                         }}
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
