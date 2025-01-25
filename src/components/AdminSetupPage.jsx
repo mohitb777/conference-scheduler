@@ -227,37 +227,40 @@ const AdminSetupPage = () => {
   };
 
   const handleSessionChange = (index, selectedSession) => {
-    const currentPaper = selectedRows[index];
-    if (!currentPaper.paperId) {
-      toast.error('Please select a paper first');
-      return;
+    try {
+      const currentPaper = selectedRows[index];
+      
+      // Get the track for the selected session
+      const expectedTrack = sessionTrackMapping[selectedSession];
+      const normalizedPaperTrack = currentPaper.tracks.trim().toLowerCase();
+      const normalizedSessionTrack = expectedTrack.trim().toLowerCase();
+
+      if (normalizedPaperTrack !== normalizedSessionTrack) {
+        toast.error(`Session ${selectedSession} can only be assigned to papers from track: ${expectedTrack}`);
+        return;
+      }
+
+      // Get corresponding time slot and date for the session
+      const timeSlot = sessionTimeSlotMapping[selectedSession];
+      const sessionNumber = parseInt(selectedSession.split(' ')[1]);
+      const date = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
+      const venue = sessionVenueMapping[selectedSession];
+
+      const updatedRows = [...selectedRows];
+      updatedRows[index] = {
+        ...currentPaper,
+        sessions: selectedSession,
+        timeSlots: timeSlot,
+        date: date,
+        venue: venue,
+        tracks: currentPaper.tracks // Preserve the original track
+      };
+
+      setSelectedRows(updatedRows);
+    } catch (error) {
+      console.error('Error in handleSessionChange:', error);
+      toast.error('Failed to update session');
     }
-
-    // Get the track for the selected session
-    const expectedTrack = sessionTrackMapping[selectedSession];
-    
-    // Normalize both tracks for comparison
-    const normalizedPaperTrack = normalizeTrackName(currentPaper.tracks);
-    const normalizedSessionTrack = normalizeTrackName(expectedTrack);
-
-    if (normalizedPaperTrack !== normalizedSessionTrack) {
-      toast.error(`Session ${selectedSession} can only be assigned to papers from track: ${expectedTrack}`);
-      return;
-    }
-
-    const timeSlot = getTimeSlotForSession(selectedSession);
-    const date = parseInt(selectedSession.split(' ')[1]) <= 5 ? '2025-02-07' : '2025-02-08';
-    const venue = sessionVenueMapping[selectedSession];
-
-    const updatedRows = [...selectedRows];
-    updatedRows[index] = {
-      ...updatedRows[index],
-      sessions: selectedSession,
-      timeSlots: timeSlot,
-      date: date,
-      venue: venue
-    };
-    setSelectedRows(updatedRows);
   };
 
   const handleSubmit = async () => {
@@ -269,11 +272,12 @@ const AdminSetupPage = () => {
         return;
       }
 
-      // Modified validation to only check papers that have an ID
-      const invalidPapers = selectedPapers.filter(paper => !paper.sessions);
-      if (invalidPapers.length > 0) {
-        toast.error(`Please select sessions for the selected paper before saving`);
-        return;
+      // Check if all required fields are present
+      for (const paper of selectedPapers) {
+        if (!paper.sessions || !paper.timeSlots || !paper.date || !paper.venue) {
+          toast.error(`Please select sessions for paper ${paper.paperId}`);
+          return;
+        }
       }
 
       const scheduleData = selectedPapers.map(paper => ({
@@ -281,12 +285,12 @@ const AdminSetupPage = () => {
         email: paper.email,
         contact: paper.contact,
         title: paper.title,
-        mode: paper.mode.charAt(0).toUpperCase() + paper.mode.slice(1).toLowerCase(),
-        tracks: paper.tracks.trim(),
+        mode: paper.mode,
+        tracks: paper.tracks,
         date: paper.date,
         timeSlots: paper.timeSlots,
         sessions: paper.sessions,
-        venue: sessionVenueMapping[paper.sessions]
+        venue: paper.venue
       }));
 
       const response = await fetch(`${API_BASE_URL}/schedule/save`, {
@@ -304,7 +308,7 @@ const AdminSetupPage = () => {
         throw new Error(data.message || 'Failed to save schedule');
       }
 
-      toast.success('Papers scheduled successfully');
+      toast.success('Schedule saved successfully');
       setTimeout(() => window.location.reload(), 1500);
     } catch (error) {
       console.error('Schedule save error:', error);
