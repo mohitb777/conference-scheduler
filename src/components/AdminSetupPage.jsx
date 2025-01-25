@@ -216,7 +216,7 @@ const AdminSetupPage = () => {
         return;
       }
 
-      // Check if all required fields are present
+      // Keep this validation to ensure all required fields are present
       for (const paper of selectedPapers) {
         console.log('Checking paper:', paper);
         if (!paper.sessions || !paper.timeSlots || !paper.date || !paper.venue) {
@@ -231,14 +231,17 @@ const AdminSetupPage = () => {
         }
       }
 
-      // Filter out unnecessary fields and include tracks
+      // Include all required fields in scheduleData
       const scheduleData = selectedPapers.map(paper => ({
         paperId: paper.paperId,
         tracks: paper.tracks,
         sessions: paper.sessions,
         timeSlots: paper.timeSlots,
         date: paper.date,
-        venue: paper.venue
+        venue: paper.venue,
+        mode: paper.mode,
+        title: paper.title,
+        email: paper.email
       }));
 
       console.log('Schedule Data to be sent:', scheduleData);
