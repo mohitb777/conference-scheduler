@@ -39,10 +39,10 @@ const scheduleSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function(date) {
-        const sessionNumber = parseInt(this.sessions.split(' ')[1]);
-        return date === (sessionNumber <= 5 ? '2025-02-07' : '2025-02-08');
+        // Allow both dates for any session
+        return date === '2025-02-07' || date === '2025-02-08';
       },
-      message: props => `Date ${props.value} is not valid for session ${this.sessions}`
+      message: props => `Date ${props.value} must be either 2025-02-07 or 2025-02-08`
     }
   },
   timeSlots: {
