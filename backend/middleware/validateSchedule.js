@@ -24,25 +24,26 @@ const validateSchedule = async (req, res, next) => {
       console.log('Validating schedule:', schedule);
       
       // Basic validation for required fields
-      if (!schedule.sessions || !schedule.timeSlots || !schedule.date) {
+      if (!schedule.sessions || !schedule.timeSlots || !schedule.date || !schedule.venue) {
         console.log('Missing required fields:', {
           sessions: !schedule.sessions,
           timeSlots: !schedule.timeSlots,
-          date: !schedule.date
+          date: !schedule.date,
+          venue: !schedule.venue
         });
         return res.status(400).json({
-          message: `Please select sessions for paper ${schedule.paperId}`
+          message: `Please select all required fields for paper ${schedule.paperId}`
         });
       }
 
-      // Validate paper exists
+      // Get paper details
       const paper = await Paper.findOne({ paperId: schedule.paperId });
       console.log('Found paper:', paper);
       
       if (!paper) {
         console.log('Paper not found:', schedule.paperId);
-        return res.status(400).json({
-          message: `Paper with ID ${schedule.paperId} not found`
+        return res.status(404).json({
+          message: `Paper ${schedule.paperId} not found`
         });
       }
 
@@ -85,7 +86,7 @@ const validateSchedule = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Validation error:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Server error during validation' });
   }
 };
 

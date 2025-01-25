@@ -465,6 +465,7 @@ const AdminSetupPage = () => {
                                 row.timeSlots = sessionTimeSlotMapping[session];
                                 row.venue = sessionVenueMapping[session];
                                 row.date = sessionDate;
+                                console.log('Updated row:', row);
                               }
                             });
                           } else {
@@ -478,7 +479,8 @@ const AdminSetupPage = () => {
                               }
                             });
                           }
-                          setSelectedRows(updatedRows);
+                          console.log('Final updatedRows:', updatedRows);
+                          setSelectedRows([...updatedRows]);
                         }}
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                       />
