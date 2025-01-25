@@ -109,38 +109,13 @@ router.post('/save', [authMiddleware, validateSchedule], async (req, res) => {
 
     const savedSchedules = await Schedule.insertMany(schedules);
 
-    // Send confirmation emails
-    for (const schedule of savedSchedules) {
-      try {
-        const paper = await Paper.findOne({ paperId: schedule.paperId });
-        if (paper) {
-          const token = await sendScheduleEmail({
-            ...schedule.toObject(),
-            email: paper.email,
-            title: paper.title,
-            authors: paper.authors,
-            paperId: paper.paperId
-          });
-          
-          await Schedule.findByIdAndUpdate(schedule._id, {
-            confirmationToken: token,
-            confirmationExpires: new Date(Date.now() + 48 * 60 * 60 * 1000)
-          });
-        }
-      } catch (emailError) {
-        console.error('Failed to send confirmation email:', emailError);
-      }
-    }
-
     return res.status(201).json({
       message: 'Schedules saved successfully',
       schedules: savedSchedules
     });
   } catch (error) {
     console.error('Save schedule error:', error);
-    return res.status(500).json({ 
-      message: error.message || 'Error saving schedules'
-    });
+    return res.status(500).json({ message: error.message });
   }
 });
 
