@@ -289,190 +289,196 @@ const ScheduleViewer = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Presentation Schedule</h1>
-        <div className="flex gap-4">
-          {isAuthenticated && isAdmin && (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Presentation Schedule</h1>
+          <div className="flex gap-4">
+            {isAuthenticated && isAdmin && (
+              <button
+                onClick={handleSendEmails}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transform hover:-translate-y-1 transition-all duration-200"
+              >
+                Send Confirmation Emails
+              </button>
+            )}
             <button
-              onClick={handleSendEmails}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transform hover:-translate-y-1 transition-all duration-200"
+              onClick={downloadPDF}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
             >
-              Send Confirmation Emails
+              Download PDF
             </button>
-          )}
-          <button
-            onClick={downloadPDF}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Download PDF
-          </button>
-          <button
-            onClick={downloadExcel}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Download Excel
-          </button>
+            <button
+              onClick={downloadExcel}
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              Download Excel
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Filters */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
-        <select
-          value={filters.date}
-          onChange={(e) => setFilters({...filters, date: e.target.value})}
-          className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-        >
-          <option value="">All Dates</option>
-          {dates.map(date => (
-            <option key={date} value={date}>{date}</option>
-          ))}
-        </select>
-
-        <select
-          value={filters.timeSlot}
-          onChange={(e) => setFilters({...filters, timeSlot: e.target.value})}
-          className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-        >
-          <option value="">All Time Slots</option>
-          {timeSlots.map(slot => (
-            <option key={slot} value={slot}>{slot}</option>
-          ))}
-        </select>
-
-        <select
-          value={filters.session}
-          onChange={(e) => setFilters({...filters, session: e.target.value})}
-          className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-        >
-          <option value="">All Sessions</option>
-          {sessions.map(session => (
-            <option key={session} value={session}>{session}</option>
-          ))}
-        </select>
-
-        <select
-          value={filters.track}
-          onChange={(e) => setFilters({...filters, track: e.target.value})}
-          className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-        >
-          <option value="">All Tracks</option>
-          {tracks.map(track => (
-            <option key={track} value={track}>{track}</option>
-          ))}
-        </select>
-
-        <select
-          value={filters.mode}
-          onChange={(e) => setFilters({...filters, mode: e.target.value})}
-          className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-        >
-          <option value="">All Modes</option>
-          {modes.map(mode => (
-            <option key={mode} value={mode}>{mode}</option>
-          ))}
-        </select>
-
-        <select
-          value={filters.venue || ''}
-          onChange={(e) => setFilters({...filters, venue: e.target.value})}
-          className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-        >
-          <option value="">All Venues</option>
-          {venues.map((venue, index) => (
-            <option key={index} value={venue}>
-              {venue}
-            </option>
-          ))}
-        </select>
-
-        {isAdmin && (
+        {/* Filters */}
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
           <select
-            value={filters.status}
-            onChange={(e) => setFilters({...filters, status: e.target.value === '' ? '' : Number(e.target.value)})}
+            value={filters.date}
+            onChange={(e) => setFilters({...filters, date: e.target.value})}
             className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
           >
-            <option value="">All Statuses</option>
-            {Object.entries(statusMapping).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
+            <option value="">All Dates</option>
+            {dates.map(date => (
+              <option key={date} value={date}>{date}</option>
+            ))}
+          </select>
+
+          <select
+            value={filters.timeSlot}
+            onChange={(e) => setFilters({...filters, timeSlot: e.target.value})}
+            className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+          >
+            <option value="">All Time Slots</option>
+            {timeSlots.map(slot => (
+              <option key={slot} value={slot}>{slot}</option>
+            ))}
+          </select>
+
+          <select
+            value={filters.session}
+            onChange={(e) => setFilters({...filters, session: e.target.value})}
+            className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+          >
+            <option value="">All Sessions</option>
+            {sessions.map(session => (
+              <option key={session} value={session}>{session}</option>
+            ))}
+          </select>
+
+          <select
+            value={filters.track}
+            onChange={(e) => setFilters({...filters, track: e.target.value})}
+            className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+          >
+            <option value="">All Tracks</option>
+            {tracks.map(track => (
+              <option key={track} value={track}>{track}</option>
+            ))}
+          </select>
+
+          <select
+            value={filters.mode}
+            onChange={(e) => setFilters({...filters, mode: e.target.value})}
+            className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+          >
+            <option value="">All Modes</option>
+            {modes.map(mode => (
+              <option key={mode} value={mode}>{mode}</option>
+            ))}
+          </select>
+
+          <select
+            value={filters.venue || ''}
+            onChange={(e) => setFilters({...filters, venue: e.target.value})}
+            className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+          >
+            <option value="">All Venues</option>
+            {venues.map((venue, index) => (
+              <option key={index} value={venue}>
+                {venue}
               </option>
             ))}
           </select>
-        )}
-      </div>
 
-      {/* Schedule Table */}
-      <div className="rounded-lg border border-gray-200 shadow-lg bg-white">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead>
-            <tr className="bg-gradient-to-r from-blue-600 to-purple-600">
-              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Paper ID</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-40">Email</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Title</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Mode</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Track</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Date</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Time Slot</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Session</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Venue</th>
-              {isAuthenticated && (
-                <>
-                  <th className="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Actions</th>
-                  <th className="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Email Status</th>
-                </>
-              )}
-              {isAdmin && <th className="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Status</th>}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredSchedules.map((schedule, index) => (
-              <tr key={schedule.paperId} 
-                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors duration-150 ease-in-out`}>
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">{schedule.paperId}</td>
-                <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-[160px]">{schedule.email}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{schedule.title}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{schedule.mode}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{schedule.tracks}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{schedule.date}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{schedule.timeSlots}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{schedule.sessions}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{sessionVenueMapping[schedule.sessions]}</td>
+          {isAdmin && (
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters({...filters, status: e.target.value === '' ? '' : Number(e.target.value)})}
+              className="p-2 border rounded hover:border-blue-500 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+            >
+              <option value="">All Statuses</option>
+              {Object.entries(statusMapping).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        {/* Schedule Table */}
+        <div className="rounded-lg border border-gray-200 shadow-lg bg-white">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr className="bg-gradient-to-r from-blue-600 to-purple-600">
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Paper ID</th>
+                {isAuthenticated && (
+                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-40">Email</th>
+                )}
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Title</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Mode</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Track</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Date</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Time Slot</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Session</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Venue</th>
                 {isAuthenticated && (
                   <>
-                    <td className="px-4 py-2 border">
-                      <button
-                        onClick={() => handleReschedule(schedule.paperId, schedule.date)}
-                        className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:from-yellow-500 hover:to-yellow-600 transform hover:-translate-y-0.5 transition-all duration-200"
-                      >
-                        Reschedule
-                      </button>
-                    </td>
-                    <td className="px-4 py-2 border">
-                      <button
-                        onClick={() => handleSendConfirmationEmail(schedule.paperId)}
-                        className="bg-gradient-to-r from-blue-400 to-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-500 hover:to-blue-600 transform hover:-translate-y-0.5 transition-all duration-200"
-                      >
-                        Send Email
-                      </button>
-                    </td>
+                    <th className="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Email Status</th>
                   </>
                 )}
-                {isAdmin && (
-                  <td className="px-6 py-4 text-center">
-                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      schedule.status === 0 ? 'bg-yellow-100 text-yellow-800' :
-                      schedule.status === 1 ? 'bg-green-100 text-green-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {statusMapping[schedule.status]}
-                    </span>
-                  </td>
-                )}
+                {isAdmin && <th className="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Status</th>}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredSchedules.map((schedule, index) => (
+                <tr key={schedule.paperId} 
+                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors duration-150 ease-in-out`}>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{schedule.paperId}</td>
+                  {isAuthenticated && (
+                    <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-[160px]">{schedule.email}</td>
+                  )}
+                  <td className="px-6 py-4 text-sm text-gray-900">{schedule.title}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{schedule.mode}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{schedule.tracks}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{schedule.date}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{schedule.timeSlots}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{schedule.sessions}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{sessionVenueMapping[schedule.sessions]}</td>
+                  {isAuthenticated && (
+                    <>
+                      <td className="px-4 py-2 border">
+                        <button
+                          onClick={() => handleReschedule(schedule.paperId, schedule.date)}
+                          className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:from-yellow-500 hover:to-yellow-600 transform hover:-translate-y-0.5 transition-all duration-200"
+                        >
+                          Reschedule
+                        </button>
+                      </td>
+                      <td className="px-4 py-2 border">
+                        <button
+                          onClick={() => handleSendConfirmationEmail(schedule.paperId)}
+                          className="bg-gradient-to-r from-blue-400 to-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-500 hover:to-blue-600 transform hover:-translate-y-0.5 transition-all duration-200"
+                        >
+                          Send Email
+                        </button>
+                      </td>
+                    </>
+                  )}
+                  {isAdmin && (
+                    <td className="px-6 py-4 text-center">
+                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        schedule.status === 0 ? 'bg-yellow-100 text-yellow-800' :
+                        schedule.status === 1 ? 'bg-green-100 text-green-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {statusMapping[schedule.status]}
+                      </span>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

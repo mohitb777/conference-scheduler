@@ -229,14 +229,8 @@ const AdminSetupPage = () => {
   const handleSessionChange = (index, selectedSession) => {
     try {
       const currentPaper = selectedRows[index];
-      
-      // Get the track for the selected session
-      const expectedTrack = sessionTrackMapping[selectedSession];
-      const normalizedPaperTrack = currentPaper.tracks.trim().toLowerCase();
-      const normalizedSessionTrack = expectedTrack.trim().toLowerCase();
-
-      if (normalizedPaperTrack !== normalizedSessionTrack) {
-        toast.error(`Session ${selectedSession} can only be assigned to papers from track: ${expectedTrack}`);
+      if (!currentPaper.paperId) {
+        toast.error('Please select a paper first');
         return;
       }
 
@@ -244,7 +238,6 @@ const AdminSetupPage = () => {
       const timeSlot = sessionTimeSlotMapping[selectedSession];
       const sessionNumber = parseInt(selectedSession.split(' ')[1]);
       const date = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
-      const venue = sessionVenueMapping[selectedSession];
 
       const updatedRows = [...selectedRows];
       updatedRows[index] = {
@@ -252,8 +245,7 @@ const AdminSetupPage = () => {
         sessions: selectedSession,
         timeSlots: timeSlot,
         date: date,
-        venue: venue,
-        tracks: currentPaper.tracks // Preserve the original track
+        venue: sessionVenueMapping[selectedSession]
       };
 
       setSelectedRows(updatedRows);
