@@ -229,6 +229,9 @@ const AdminSetupPage = () => {
   const handleSessionChange = (index, selectedSession) => {
     try {
       const currentPaper = selectedRows[index];
+      console.log('Current Paper:', currentPaper);
+      console.log('Selected Session:', selectedSession);
+
       if (!currentPaper.paperId) {
         toast.error('Please select a paper first');
         return;
@@ -240,12 +243,9 @@ const AdminSetupPage = () => {
       const date = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
       const venue = sessionVenueMapping[selectedSession];
 
-      // Validate if the session matches the paper's track
-      const expectedTrack = sessionTrackMapping[selectedSession];
-      if (!expectedTrack || normalizeTrackName(expectedTrack) !== normalizeTrackName(currentPaper.tracks)) {
-        toast.error(`Invalid session for track: ${currentPaper.tracks}`);
-        return;
-      }
+      console.log('Time Slot:', timeSlot);
+      console.log('Date:', date);
+      console.log('Venue:', venue);
 
       const updatedRows = [...selectedRows];
       updatedRows[index] = {
@@ -256,7 +256,7 @@ const AdminSetupPage = () => {
         venue: venue
       };
 
-      // Update state and force re-render
+      console.log('Updated Row:', updatedRows[index]);
       setSelectedRows([...updatedRows]);
     } catch (error) {
       console.error('Error in handleSessionChange:', error);
@@ -267,6 +267,7 @@ const AdminSetupPage = () => {
   const handleSubmit = async () => {
     try {
       const selectedPapers = selectedRows.filter(row => row.paperId);
+      console.log('Selected Papers:', selectedPapers);
       
       if (selectedPapers.length === 0) {
         toast.error('Please select at least one paper');
@@ -275,7 +276,14 @@ const AdminSetupPage = () => {
 
       // Check if all required fields are present
       for (const paper of selectedPapers) {
+        console.log('Checking paper:', paper);
         if (!paper.sessions || !paper.timeSlots || !paper.date || !paper.venue) {
+          console.log('Missing fields:', {
+            sessions: !paper.sessions,
+            timeSlots: !paper.timeSlots,
+            date: !paper.date,
+            venue: !paper.venue
+          });
           toast.error(`Please select sessions for paper ${paper.paperId}`);
           return;
         }
@@ -294,6 +302,8 @@ const AdminSetupPage = () => {
         venue: paper.venue
       }));
 
+      console.log('Schedule Data to be sent:', scheduleData);
+
       const response = await fetch(`${API_BASE_URL}/schedule/save`, {
         method: 'POST',
         headers: {
@@ -304,6 +314,7 @@ const AdminSetupPage = () => {
       });
 
       const data = await response.json();
+      console.log('Response from server:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to save schedule');

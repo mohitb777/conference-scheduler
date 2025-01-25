@@ -9,6 +9,7 @@ const normalizeTrackName = (track) => {
 const validateSchedule = async (req, res, next) => {
   try {
     const schedules = Array.isArray(req.body) ? req.body : [req.body];
+    console.log('Validating schedules:', schedules);
     
     // Check for duplicate paperIds
     const paperIds = schedules.map(s => s.paperId);
@@ -20,8 +21,15 @@ const validateSchedule = async (req, res, next) => {
     }
 
     for (const schedule of schedules) {
+      console.log('Validating schedule:', schedule);
+      
       // Basic validation for required fields
       if (!schedule.sessions || !schedule.timeSlots || !schedule.date) {
+        console.log('Missing required fields:', {
+          sessions: !schedule.sessions,
+          timeSlots: !schedule.timeSlots,
+          date: !schedule.date
+        });
         return res.status(400).json({
           message: `Please select sessions for paper ${schedule.paperId}`
         });
@@ -29,7 +37,10 @@ const validateSchedule = async (req, res, next) => {
 
       // Validate paper exists
       const paper = await Paper.findOne({ paperId: schedule.paperId });
+      console.log('Found paper:', paper);
+      
       if (!paper) {
+        console.log('Paper not found:', schedule.paperId);
         return res.status(400).json({
           message: `Paper with ID ${schedule.paperId} not found`
         });
@@ -45,7 +56,11 @@ const validateSchedule = async (req, res, next) => {
 
       // Validate session exists and matches track
       const expectedTrack = sessionTrackMapping[schedule.sessions];
+      console.log('Expected track:', expectedTrack);
+      console.log('Paper track:', paper.tracks);
+      
       if (!expectedTrack) {
+        console.log('Invalid session:', schedule.sessions);
         return res.status(400).json({
           message: `Invalid session: ${schedule.sessions}`
         });
