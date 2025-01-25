@@ -100,7 +100,6 @@ const AdminSetupPage = () => {
 
   const handlePaperSelect = async (index, paperId) => {
     try {
-      // Skip if no paper ID selected
       if (!paperId) return;
 
       const scheduleResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.CHECK(paperId)}`);
@@ -116,26 +115,33 @@ const AdminSetupPage = () => {
         return;
       }
 
-      // Update the current row with paper details
-      const updatedRows = [...selectedRows];
-      updatedRows[index] = {
-        ...paper,
-        sessions: '',
-        timeSlots: '',
-        date: ''
-      };
-      setSelectedRows(updatedRows);
-
-      // Add to selectedPaperIds after successful update
-      setSelectedPaperIds(prev => [...prev, paperId]);
-
       // Get available sessions for this track
       const availableSessions = Object.entries(sessionTrackMapping)
         .filter(([_, trackName]) => normalizeTrackName(trackName) === normalizeTrackName(paper.tracks))
         .map(([session]) => session);
-      
-      // Update selected sessions
-      setSelectedSessions(prev => [...new Set([...prev, ...availableSessions])]);
+
+      if (availableSessions.length > 0) {
+        const selectedSession = availableSessions[0]; // Take the first available session
+        const sessionNumber = parseInt(selectedSession.split(' ')[1]);
+        const date = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
+        
+        // Update the current row with paper details and session info
+        const updatedRows = [...selectedRows];
+        updatedRows[index] = {
+          ...paper,
+          sessions: selectedSession,
+          timeSlots: sessionTimeSlotMapping[selectedSession],
+          date: date,
+          venue: sessionVenueMapping[selectedSession]
+        };
+        setSelectedRows(updatedRows);
+        
+        // Update selected sessions
+        setSelectedSessions(prev => [...new Set([...prev, selectedSession])]);
+        setSelectedPaperIds(prev => [...prev, paperId]);
+      } else {
+        toast.error('No available sessions for this paper\'s track');
+      }
 
       console.log('Paper selected:', paper);
       console.log('Available sessions:', availableSessions);
