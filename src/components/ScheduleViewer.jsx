@@ -85,13 +85,18 @@ const ScheduleViewer = () => {
     return () => clearInterval(intervalId);
   }, [refreshTrigger]);
 
+  const normalizeMode = (mode) => {
+    if (!mode) return '';
+    return mode.toLowerCase().trim();
+  };
+
   const filteredSchedules = schedules.filter(schedule => {
     return (
       (!filters.date || schedule.date === filters.date) &&
       (!filters.timeSlot || schedule.timeSlots === filters.timeSlot) &&
       (!filters.session || schedule.sessions === filters.session) &&
       (!filters.track || schedule.tracks === filters.track) &&
-      (!filters.mode || schedule.mode === filters.mode) &&
+      (!filters.mode || normalizeMode(schedule.mode) === normalizeMode(filters.mode)) &&
       (!filters.venue || sessionVenueMapping[schedule.sessions] === filters.venue) &&
       (filters.status === '' || Number(schedule.status) === Number(filters.status))
     );
@@ -370,7 +375,7 @@ const ScheduleViewer = () => {
           >
             <option value="">All Modes</option>
             {modes.map(mode => (
-              <option key={mode} value={mode}>{mode}</option>
+              <option key={mode} value={mode.toLowerCase()}>{mode}</option>
             ))}
           </select>
 
@@ -404,7 +409,7 @@ const ScheduleViewer = () => {
         </div>
 
         {/* Schedule Table */}
-        <div className="rounded-lg border border-gray-200 shadow-lg bg-white">
+        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-lg bg-white">
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr className="bg-gradient-to-r from-blue-600 to-purple-600">
