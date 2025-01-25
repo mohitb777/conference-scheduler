@@ -53,12 +53,9 @@ const AdminSetupPage = () => {
     sessions: ''
   }]);
   const [selectedSessions, setSelectedSessions] = useState([]);
+  const [selectedPaperIds, setSelectedPaperIds] = useState([]);
 
   const dates = ['2025-02-07', '2025-02-08'];
-  // const timeSlots = [
-  //   '11:30 AM - 1:00 PM',
-  //   '2:40 PM - 4:30 PM'
-  // ];
   const sessions = [
     'Session 1', 'Session 2', 'Session 3', 'Session 4', 'Session 5',
     'Session 6', 'Session 7', 'Session 8', 'Session 9', 'Session 10'
@@ -109,11 +106,13 @@ const AdminSetupPage = () => {
         toast.error(`Paper ${paperId} is already scheduled`);
         return;
       }
+
       const paper = papers.find(p => p.paperId.toString() === paperId.toString());
       if (!paper) return;
-      const availableSessions = Object.entries(sessionTrackMapping)
-        .filter(([_, trackName]) => normalizeTrackName(trackName) === normalizeTrackName(paper.tracks))
-        .map(([session]) => session);     
+
+      // Add paper to selectedPaperIds
+      setSelectedPaperIds(prev => [...prev, paperId]);
+
       const updatedRows = [...selectedRows];
       updatedRows[index] = {
         ...paper,
@@ -122,7 +121,37 @@ const AdminSetupPage = () => {
         date: ''
       };
       setSelectedRows(updatedRows);
-      setSelectedSessions(availableSessions);
+
+      // Get available sessions for this track
+      const availableSessions = Object.entries(sessionTrackMapping)
+        .filter(([_, trackName]) => normalizeTrackName(trackName) === normalizeTrackName(paper.tracks))
+        .map(([session]) => session);
+      
+      // Automatically select sessions that match the track
+      setSelectedSessions(prev => [...new Set([...prev, ...availableSessions])]);
+
+      // Update all selected papers with matching sessions
+      const updatedRowsWithSessions = selectedRows.map(row => {
+        if (selectedPaperIds.includes(row.paperId)) {
+          const matchingSession = availableSessions.find(session => {
+            const sessionTrack = sessionTrackMapping[session];
+            return normalizeTrackName(row.tracks) === normalizeTrackName(sessionTrack);
+          });
+
+          if (matchingSession) {
+            const sessionNumber = parseInt(matchingSession.split(' ')[1]);
+            return {
+              ...row,
+              sessions: matchingSession,
+              timeSlots: sessionTimeSlotMapping[matchingSession],
+              date: sessionNumber <= 5 ? '2025-02-07' : '2025-02-08',
+              venue: sessionVenueMapping[matchingSession]
+            };
+          }
+        }
+        return row;
+      });
+      setSelectedRows(updatedRowsWithSessions);
     } catch (error) {
       console.error('Error selecting paper:', error);
       toast.error('Failed to select paper');
@@ -175,44 +204,6 @@ const AdminSetupPage = () => {
       // Remove the row from the array
       const updatedRows = selectedRows.filter((_, i) => i !== index);
       setSelectedRows(updatedRows);
-    }
-  };
-
-  const handleSessionChange = (index, selectedSession) => {
-    try {
-      const currentPaper = selectedRows[index];
-      console.log('Current Paper:', currentPaper);
-      console.log('Selected Session:', selectedSession);
-
-      if (!currentPaper.paperId) {
-        toast.error('Please select a paper first');
-        return;
-      }
-
-      // Get corresponding time slot and date for the session
-      const timeSlot = sessionTimeSlotMapping[selectedSession];
-      const sessionNumber = parseInt(selectedSession.split(' ')[1]);
-      const date = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
-      const venue = sessionVenueMapping[selectedSession];
-
-      console.log('Time Slot:', timeSlot);
-      console.log('Date:', date);
-      console.log('Venue:', venue);
-
-      const updatedRows = [...selectedRows];
-      updatedRows[index] = {
-        ...currentPaper,
-        sessions: selectedSession,
-        timeSlots: timeSlot,
-        date: date,
-        venue: venue
-      };
-
-      console.log('Updated Row:', updatedRows[index]);
-      setSelectedRows([...updatedRows]);
-    } catch (error) {
-      console.error('Error in handleSessionChange:', error);
-      toast.error('Failed to update session');
     }
   };
 
@@ -421,21 +412,12 @@ const AdminSetupPage = () => {
                         type="checkbox"
                         checked={selectedSessions.includes(session)}
                         onChange={(e) => {
+                          // Sessions are now automatically selected based on paper tracks
+                          // This handler is only for manually overriding if needed
                           if (e.target.checked) {
-                            setSelectedSessions([...selectedSessions, session]);
-                            handleSessionChange(index, session);
+                            setSelectedSessions(prev => [...prev, session]);
                           } else {
-                            setSelectedSessions(selectedSessions.filter(s => s !== session));
-                            // Clear session data
-                            const updatedRows = [...selectedRows];
-                            updatedRows[index] = {
-                              ...updatedRows[index],
-                              sessions: '',
-                              timeSlots: '',
-                              venue: '',
-                              date: ''
-                            };
-                            setSelectedRows(updatedRows);
+                            setSelectedSessions(prev => prev.filter(s => s !== session));
                           }
                         }}
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
