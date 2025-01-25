@@ -296,26 +296,26 @@ const ScheduleViewer = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold">Presentation Schedule</h1>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             {isAuthenticated && isAdmin && (
               <button
                 onClick={handleSendEmails}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transform hover:-translate-y-1 transition-all duration-200"
+                className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transform hover:-translate-y-1 transition-all duration-200"
               >
                 Send Confirmation Emails
               </button>
             )}
             <button
               onClick={downloadPDF}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
             >
               Download PDF
             </button>
             <button
               onClick={downloadExcel}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
             >
               Download Excel
             </button>
