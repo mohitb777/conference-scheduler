@@ -239,7 +239,7 @@ const AdminSetupPage = () => {
         timeSlots: paper.timeSlots,
         date: paper.date,
         venue: paper.venue,
-        mode: paper.mode.toUpperCase(),
+        mode: paper.mode,
         title: paper.title,
         email: paper.email
       }));
