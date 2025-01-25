@@ -470,14 +470,10 @@ const AdminSetupPage = () => {
                               if (row.paperId) {
                                 const sessionNumber = parseInt(session.split(' ')[1]);
                                 const sessionDate = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
-                                const timeSlot = sessionTimeSlotMapping[session];
-                                const venue = sessionVenueMapping[session];
-                                
                                 row.sessions = session;
-                                row.timeSlots = timeSlot;
-                                row.venue = venue;
+                                row.timeSlots = sessionTimeSlotMapping[session];
+                                row.venue = sessionVenueMapping[session];
                                 row.date = sessionDate;
-                                console.log('Updated row:', row);
                               }
                             });
                           } else {
@@ -491,7 +487,8 @@ const AdminSetupPage = () => {
                               }
                             });
                           }
-                          setSelectedRows([...updatedRows]);
+                          setSelectedRows(updatedRows);
+                          console.log('Updated rows:', updatedRows);
                         }}
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                       />
