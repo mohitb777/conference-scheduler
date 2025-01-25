@@ -238,6 +238,7 @@ const AdminSetupPage = () => {
       const timeSlot = sessionTimeSlotMapping[selectedSession];
       const sessionNumber = parseInt(selectedSession.split(' ')[1]);
       const date = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
+      const venue = sessionVenueMapping[selectedSession];
 
       const updatedRows = [...selectedRows];
       updatedRows[index] = {
@@ -245,10 +246,14 @@ const AdminSetupPage = () => {
         sessions: selectedSession,
         timeSlots: timeSlot,
         date: date,
-        venue: sessionVenueMapping[selectedSession]
+        venue: venue,
+        tracks: currentPaper.tracks // Ensure tracks are preserved
       };
 
       setSelectedRows(updatedRows);
+      
+      // Force update to trigger re-render
+      setSelectedRows([...updatedRows]);
     } catch (error) {
       console.error('Error in handleSessionChange:', error);
       toast.error('Failed to update session');

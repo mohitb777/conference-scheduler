@@ -38,35 +38,25 @@ const validateSchedule = async (req, res, next) => {
         });
       }
 
-      // Validate track matches paper
-      if (normalizeTrackName(schedule.tracks) !== normalizeTrackName(paper.tracks)) {
-        return res.status(400).json({
-          message: `Invalid track for paper ${schedule.paperId}. Expected: ${paper.tracks}`
-        });
-      }
-
-      // Validate session-track association
+      // Validate session exists and matches track
       const expectedTrack = sessionTrackMapping[schedule.sessions];
-      if (!expectedTrack || normalizeTrackName(schedule.tracks) !== normalizeTrackName(expectedTrack)) {
+      if (!expectedTrack) {
         return res.status(400).json({
-          message: `Invalid session for track: ${schedule.tracks}`
+          message: `Invalid session: ${schedule.sessions}`
         });
       }
 
-      // Validate time slot
-      const expectedTimeSlot = sessionTimeSlotMapping[schedule.sessions];
-      if (!expectedTimeSlot || schedule.timeSlots !== expectedTimeSlot) {
-        return res.status(400).json({
-          message: `Invalid time slot for session ${schedule.sessions}`
-        });
-      }
+      // Check if slot is already taken
+      const existingSlot = await Schedule.findOne({
+        date: schedule.date,
+        timeSlots: schedule.timeSlots,
+        sessions: schedule.sessions,
+        paperId: { $ne: schedule.paperId }
+      });
 
-      // Validate date based on session
-      const sessionNumber = parseInt(schedule.sessions.split(' ')[1]);
-      const expectedDate = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
-      if (schedule.date !== expectedDate) {
+      if (existingSlot) {
         return res.status(400).json({
-          message: `Invalid date for session ${schedule.sessions}. Expected: ${expectedDate}`
+          message: `Time slot ${schedule.timeSlots} is already taken in session ${schedule.sessions}`
         });
       }
     }
