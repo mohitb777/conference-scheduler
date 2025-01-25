@@ -289,22 +289,26 @@ const AdminSetupPage = () => {
         }
       }
 
-      const scheduleData = selectedPapers.map(paper => ({
-        paperId: paper.paperId,
-        email: paper.email,
-        contact: paper.contact,
-        title: paper.title,
-        mode: paper.mode,
-        tracks: paper.tracks,
-        date: paper.date,
-        timeSlots: paper.timeSlots,
-        sessions: paper.sessions,
-        venue: paper.venue
+      // Filter out unnecessary fields before sending
+      const scheduleData = selectedPapers.map(({ 
+        paperId, 
+        tracks, 
+        sessions, 
+        timeSlots, 
+        date, 
+        venue 
+      }) => ({
+        paperId,
+        tracks,
+        sessions,
+        timeSlots,
+        date,
+        venue
       }));
 
       console.log('Schedule Data to be sent:', scheduleData);
 
-      const response = await fetch(`${API_BASE_URL}/schedule/save`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.SAVE}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
