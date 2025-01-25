@@ -83,8 +83,8 @@ const sendScheduleEmail = async (schedule) => {
     }
 
     const token = generateToken();
-    const confirmationLink = `${process.env.API_URL}/api/schedule/confirm/${token}`;
-    const denyLink = `${process.env.API_URL}/api/schedule/deny/${token}`;
+    const confirmationLink = `${process.env.FRONTEND_URL}/confirm/${token}`;
+    const denyLink = `${process.env.FRONTEND_URL}/deny/${token}`;
     const venue = sessionVenueMapping[schedule.sessions];
 
     if (!venue) {
@@ -98,7 +98,7 @@ const sendScheduleEmail = async (schedule) => {
     });
 
     const mailOptions = {
-      from: `"RAMSITA 2025" <${process.env.GMAIL_USER}>`,
+      from: `"RAMSITA 2025" <ramsitainternationalconference@gmail.com>`,
       to: schedule.email,
       subject: 'RAMSITA 2025 - Conference Presentation Schedule Confirmation',
       html: `
