@@ -117,8 +117,6 @@ const AdminSetupPage = () => {
 
   const handlePaperSelect = async (index, paperId) => {
     try {
-      // Check if paper is already scheduled
-    //  const scheduleResponse = await fetch(`/api/schedule/check/${paperId}`);
       const scheduleResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.CHECK(paperId)}`);
       const scheduleData = await scheduleResponse.json();
       
@@ -131,14 +129,16 @@ const AdminSetupPage = () => {
       if (!paper) return;
 
       // Get sessions available for this paper's track
-      const availableSessions = getSessionsForTrack(paper.tracks);
+      const availableSessions = Object.entries(sessionTrackMapping)
+        .filter(([_, trackName]) => normalizeTrackName(trackName) === normalizeTrackName(paper.tracks))
+        .map(([session]) => session);
       
       const updatedRows = [...selectedRows];
       updatedRows[index] = {
         ...paper,
-        sessions: '',  // Clear previous session
-        timeSlots: '', // Clear previous time slot
-        date: ''      // Clear previous date
+        sessions: '',
+        timeSlots: '',
+        date: ''
       };
       setSelectedRows(updatedRows);
       
@@ -233,8 +233,14 @@ const AdminSetupPage = () => {
       return;
     }
 
+    // Get the track for the selected session
     const expectedTrack = sessionTrackMapping[selectedSession];
-    if (normalizeTrackName(currentPaper.tracks) !== normalizeTrackName(expectedTrack)) {
+    
+    // Normalize both tracks for comparison
+    const normalizedPaperTrack = normalizeTrackName(currentPaper.tracks);
+    const normalizedSessionTrack = normalizeTrackName(expectedTrack);
+
+    if (normalizedPaperTrack !== normalizedSessionTrack) {
       toast.error(`Session ${selectedSession} can only be assigned to papers from track: ${expectedTrack}`);
       return;
     }
