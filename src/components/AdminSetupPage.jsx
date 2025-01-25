@@ -263,10 +263,10 @@ const AdminSetupPage = () => {
         return;
       }
 
-      // Validate sessions are selected
+      // Modified validation to only check papers that have an ID
       const invalidPapers = selectedPapers.filter(paper => !paper.sessions);
       if (invalidPapers.length > 0) {
-        toast.error(`Please select sessions for all papers before saving`);
+        toast.error(`Please select sessions for the selected paper before saving`);
         return;
       }
 
