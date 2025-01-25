@@ -457,10 +457,10 @@ const AdminSetupPage = () => {
                           const updatedRows = [...selectedRows];
                           if (e.target.checked) {
                             setSelectedSessions([...selectedSessions, session]);
-                            // Update all selected papers with the same session information
                             updatedRows.forEach(row => {
                               if (row.paperId) {
-                                const sessionDate = parseInt(session.split(' ')[1]) <= 5 ? '2025-02-07' : '2025-02-08';
+                                const sessionNumber = parseInt(session.split(' ')[1]);
+                                const sessionDate = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
                                 row.sessions = session;
                                 row.timeSlots = sessionTimeSlotMapping[session];
                                 row.venue = sessionVenueMapping[session];
@@ -469,7 +469,6 @@ const AdminSetupPage = () => {
                             });
                           } else {
                             setSelectedSessions(selectedSessions.filter(s => s !== session));
-                            // Clear the session from papers that had this session
                             updatedRows.forEach(row => {
                               if (row.sessions === session) {
                                 row.sessions = '';
@@ -680,4 +679,3 @@ const TimeSlotCheckbox = ({ slot, session, date, isChecked, onChange }) => {
 };
 
 export default AdminSetupPage;
-
