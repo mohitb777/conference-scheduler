@@ -12,7 +12,6 @@ const validateSchedule = async (req, res, next) => {
     console.log('Validating schedules:', schedules);
     
     for (const schedule of schedules) {
-      // Get paper details first
       const paper = await Paper.findOne({ paperId: schedule.paperId });
       if (!paper) {
         return res.status(404).json({
@@ -44,7 +43,8 @@ const validateSchedule = async (req, res, next) => {
       // Check session capacity
       const sessionCount = await Schedule.countDocuments({
         date: schedule.date,
-        sessions: schedule.sessions
+        sessions: schedule.sessions,
+        paperId: { $ne: schedule.paperId } // Exclude current paper from count
       });
 
       if (sessionCount >= 15) {

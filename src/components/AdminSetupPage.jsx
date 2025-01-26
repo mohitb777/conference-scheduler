@@ -115,36 +115,51 @@ const AdminSetupPage = () => {
         return;
       }
 
-      // Get available sessions for this track
-      const availableSessions = Object.entries(sessionTrackMapping)
-        .filter(([_, trackName]) => normalizeTrackName(trackName) === normalizeTrackName(paper.tracks))
-        .map(([session]) => session);
+      // Check if there's a manually selected session
+      const currentRow = selectedRows[index];
+      const manuallySelectedSession = currentRow?.sessions;
 
-      if (availableSessions.length > 0) {
-        const selectedSession = availableSessions[0]; // Take the first available session
-        const sessionNumber = parseInt(selectedSession.split(' ')[1]);
-        const date = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
-        
-        // Update the current row with paper details and session info
-        const updatedRows = [...selectedRows];
-        updatedRows[index] = {
-          ...paper,
-          sessions: selectedSession,
-          timeSlots: sessionTimeSlotMapping[selectedSession],
-          date: date,
-          venue: sessionVenueMapping[selectedSession]
-        };
-        setSelectedRows(updatedRows);
-        
-        // Update selected sessions
-        setSelectedSessions(prev => [...new Set([...prev, selectedSession])]);
-        setSelectedPaperIds(prev => [...prev, paperId]);
+      let selectedSession;
+      if (manuallySelectedSession && sessionTrackMapping[manuallySelectedSession]) {
+        // Verify if manual selection matches paper track
+        if (normalizeTrackName(sessionTrackMapping[manuallySelectedSession]) === normalizeTrackName(paper.tracks)) {
+          selectedSession = manuallySelectedSession;
+        } else {
+          toast.error('Selected session does not match paper track');
+          return;
+        }
       } else {
-        toast.error('No available sessions for this paper\'s track');
+        // Fallback to automatic session selection
+        const availableSessions = Object.entries(sessionTrackMapping)
+          .filter(([_, trackName]) => normalizeTrackName(trackName) === normalizeTrackName(paper.tracks))
+          .map(([session]) => session);
+
+        if (availableSessions.length > 0) {
+          selectedSession = availableSessions[0];
+        } else {
+          toast.error('No available sessions for this paper\'s track');
+          return;
+        }
       }
 
-      console.log('Paper selected:', paper);
-      console.log('Available sessions:', availableSessions);
+      const sessionNumber = parseInt(selectedSession.split(' ')[1]);
+      const date = sessionNumber <= 5 ? '2025-02-07' : '2025-02-08';
+      
+      // Update the current row with paper details and session info
+      const updatedRows = [...selectedRows];
+      updatedRows[index] = {
+        ...paper,
+        sessions: selectedSession,
+        timeSlots: sessionTimeSlotMapping[selectedSession],
+        date: date,
+        venue: sessionVenueMapping[selectedSession]
+      };
+      setSelectedRows(updatedRows);
+      
+      // Update selected sessions
+      setSelectedSessions(prev => [...new Set([...prev, selectedSession])]);
+      setSelectedPaperIds(prev => [...prev, paperId]);
+
     } catch (error) {
       console.error('Error selecting paper:', error);
       toast.error('Failed to select paper');
