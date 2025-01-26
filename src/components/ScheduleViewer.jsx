@@ -160,75 +160,6 @@ const ScheduleViewer = () => {
     }
   };
 
-  const handleReschedule = async (paperId, currentDate) => {
-    try {
-      if (!token) {
-        toast.error('Authentication required');
-        return;
-      }
-
-      // Find the other date
-      const otherDate = dates.find(date => date !== currentDate);
-      
-      // Get available slots for the other date
-      const response = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/available-slots?date=${otherDate}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch available slots');
-      }
-      const availableSlots = await response.json();
-      
-      // Get current schedule to check track
-      const scheduleResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE.CHECK(paperId)}`);
-      const scheduleData = await scheduleResponse.json();
-      
-      if (!scheduleResponse.ok || !scheduleData.schedule) {
-        throw new Error('Failed to fetch current schedule');
-      }
-
-      // Find first available slot that matches the track
-      const firstAvailable = availableSlots.find(slot => {
-        const expectedTrack = sessionTrackMapping[slot.session];
-        return slot.isAvailable && normalizeTrackName(expectedTrack) === normalizeTrackName(scheduleData.schedule.tracks);
-      });
-      
-      if (!firstAvailable) {
-        toast.error('No compatible slots found on the other date');
-        return;
-      }
-
-      // Reschedule the paper
-      const rescheduleResponse = await fetch(`https://conference-scheduler-bay.vercel.app/api/schedule/reschedule/${paperId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token
-        },
-        body: JSON.stringify({
-          newDate: otherDate,
-          newTimeSlot: firstAvailable.timeSlot,
-          newSession: firstAvailable.session
-        }),
-      });
-
-      const result = await rescheduleResponse.json();
-
-      if (!rescheduleResponse.ok) {
-        throw new Error(result.message || 'Failed to reschedule paper');
-      }
-
-      if (result.message.includes('email sending failed')) {
-        toast.warning('Paper rescheduled but confirmation email could not be sent');
-      } else {
-        toast.success('Paper rescheduled and confirmation email sent');
-      }
-      
-      await fetchSchedules();
-    } catch (error) {
-      console.error('Error rescheduling:', error);
-      toast.error(error.message || 'Failed to reschedule paper');
-    }
-  };
-
   const handleSendEmails = async () => {
     try {
       if (!token) {
@@ -290,6 +221,33 @@ const ScheduleViewer = () => {
     } catch (error) {
       console.error('Error sending confirmation email:', error);
       toast.error(error.message || 'Failed to send confirmation email');
+    }
+  };
+
+  const handleDelete = async (paperId) => {
+    try {
+      if (!token) {
+        toast.error('Authentication required');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/schedule/${paperId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete schedule');
+      }
+
+      toast.success('Schedule deleted successfully');
+      await fetchSchedules(); // Refresh the schedules list
+    } catch (error) {
+      console.error('Error deleting schedule:', error);
+      toast.error(error.message || 'Failed to delete schedule');
     }
   };
 
@@ -452,10 +410,10 @@ const ScheduleViewer = () => {
                     <>
                       <td className="px-4 py-2 border">
                         <button
-                          onClick={() => handleReschedule(schedule.paperId, schedule.date)}
-                          className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:from-yellow-500 hover:to-yellow-600 transform hover:-translate-y-0.5 transition-all duration-200"
+                          onClick={() => handleDelete(schedule.paperId)}
+                          className="bg-gradient-to-r from-red-400 to-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:from-red-500 hover:to-red-600 transform hover:-translate-y-0.5 transition-all duration-200"
                         >
-                          Reschedule
+                          Delete
                         </button>
                       </td>
                       <td className="px-4 py-2 border">
