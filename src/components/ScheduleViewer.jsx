@@ -239,8 +239,10 @@ const ScheduleViewer = () => {
         }
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to delete schedule');
+        throw new Error(data.message || 'Failed to delete schedule');
       }
 
       toast.success('Schedule deleted successfully');
