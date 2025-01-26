@@ -347,8 +347,14 @@ router.put('/schedule/update', authMiddleware, async (req, res) => {
 
 router.delete('/schedule/delete', authMiddleware, async (req, res) => {
   try {
-    console.log('Deleting schedule for paperId:', req.params.paperId);
-    const result = await Schedule.findOneAndDelete({ paperId: req.params.paperId });
+    const { paperId } = req.body;
+    console.log('Deleting schedule for paperId:', paperId);
+    
+    if (!paperId) {
+      return res.status(400).json({ message: 'Paper ID is required' });
+    }
+
+    const result = await Schedule.findOneAndDelete({ paperId: paperId });
     
     if (!result) {
       console.log('No schedule found for deletion');

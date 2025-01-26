@@ -231,12 +231,13 @@ const ScheduleViewer = () => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/schedule/${paperId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/schedule/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'x-auth-token': token
-        }
+        },
+        body: JSON.stringify({ paperId })
       });
 
       const data = await response.json();
