@@ -128,12 +128,6 @@ const AuthPage = () => {
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 hover:-translate-y-0.5"
                   />
-                  <button
-                    type="submit"
-                    className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
-                  >
-                    Sign Up
-                  </button>
                 </form>
               </div>
             </div>
