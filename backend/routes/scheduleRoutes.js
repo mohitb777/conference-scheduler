@@ -284,7 +284,7 @@ router.get('/download/pdf', async (req, res) => {
 
       // Define table structure
       const headers = ['Time', 'Session', 'Paper ID', 'Title', 'Mode', 'Track', 'Venue'];
-      const colWidths = [60, 70, 70, 120, 50, 70, 80];
+      const colWidths = [60, 70, 70, 120, 50, 70, 130];
       const startX = 30;
       const startY = doc.y;
       let currentY = startY;
