@@ -115,31 +115,30 @@ const AdminSetupPage = () => {
         return;
       }
 
-      // Check if there's a manually selected session
-      const currentRow = selectedRows[index];
-      const manuallySelectedSession = currentRow?.sessions;
+      // Get the manually selected session if it exists
+      const manuallySelectedSession = selectedRows[0]?.sessions;
 
       let selectedSession;
-      if (manuallySelectedSession && sessionTrackMapping[manuallySelectedSession]) {
+      if (manuallySelectedSession) {
         // Verify if manual selection matches paper track
-        if (normalizeTrackName(sessionTrackMapping[manuallySelectedSession]) === normalizeTrackName(paper.tracks)) {
+        const expectedTrack = sessionTrackMapping[manuallySelectedSession];
+        if (normalizeTrackName(expectedTrack) === normalizeTrackName(paper.tracks)) {
           selectedSession = manuallySelectedSession;
         } else {
           toast.error('Selected session does not match paper track');
           return;
         }
       } else {
-        // Fallback to automatic session selection
+        // Only fall back to automatic selection if no manual selection exists
         const availableSessions = Object.entries(sessionTrackMapping)
           .filter(([_, trackName]) => normalizeTrackName(trackName) === normalizeTrackName(paper.tracks))
           .map(([session]) => session);
 
-        if (availableSessions.length > 0) {
-          selectedSession = availableSessions[0];
-        } else {
+        if (availableSessions.length === 0) {
           toast.error('No available sessions for this paper\'s track');
           return;
         }
+        selectedSession = availableSessions[0];
       }
 
       const sessionNumber = parseInt(selectedSession.split(' ')[1]);
@@ -156,15 +155,24 @@ const AdminSetupPage = () => {
       };
       setSelectedRows(updatedRows);
       
-      // Update selected sessions
-      setSelectedSessions(prev => [...new Set([...prev, selectedSession])]);
-      setSelectedPaperIds(prev => [...prev, paperId]);
-
     } catch (error) {
       console.error('Error selecting paper:', error);
       toast.error('Failed to select paper');
     }
   };
+
+  const handleSessionSelect = (session) => {
+    const updatedRows = [...selectedRows];
+    updatedRows[0] = {
+      ...updatedRows[0],
+      sessions: session,
+      timeSlots: sessionTimeSlotMapping[session],
+      venue: sessionVenueMapping[session]
+    };
+    setSelectedRows(updatedRows);
+    setSelectedSessions(prev => [...new Set([...prev, session])]);
+  };
+
   const handleTrackChange = (index, track) => {
     const updatedRows = [...selectedRows];
     updatedRows[index] = {
@@ -415,22 +423,15 @@ const AdminSetupPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {sessions
                 .filter(session => getAvailableSessions(selectedRows[0]?.date).includes(session))
-                .map((session, index) => (
+                .map((session) => (
                   <div key={session} 
                     className="flex flex-col p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200">
                     <div className="flex items-center mb-2">
                       <input
-                        type="checkbox"
-                        checked={selectedSessions.includes(session)}
-                        onChange={(e) => {
-                          // Sessions are now automatically selected based on paper tracks
-                          // This handler is only for manually overriding if needed
-                          if (e.target.checked) {
-                            setSelectedSessions(prev => [...prev, session]);
-                          } else {
-                            setSelectedSessions(prev => prev.filter(s => s !== session));
-                          }
-                        }}
+                        type="radio"
+                        name="session-selection"
+                        checked={selectedRows[0]?.sessions === session}
+                        onChange={() => handleSessionSelect(session)}
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                       />
                       <div className="ml-3">
