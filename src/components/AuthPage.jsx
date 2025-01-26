@@ -167,25 +167,6 @@ const AuthPage = () => {
               </div>
             </div>
           </div>
-
-          {/* Toggle Button */}
-          <div
-            className={`absolute top-0 w-1/2 h-full flex items-center justify-center transform transition-all duration-700 ease-in-out ${
-              isLogin ? "left-0 rotate-0" : "right-0 rotate-180"
-            }`}
-          >
-            <div className={`flex flex-col items-center gap-2 transform ${isLogin ? "rotate-0" : "rotate-180"}`}>
-              <p className="text-gray-600">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}
-              </p>
-              <button
-                onClick={toggleForm}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
-              >
-                {isLogin ? "Sign Up" : "Login"}
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
