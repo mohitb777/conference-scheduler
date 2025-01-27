@@ -388,6 +388,7 @@ const ScheduleViewer = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr className="bg-gradient-to-r from-blue-600 to-purple-600">
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">S.No.</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Paper ID</th>
                 {isAuthenticated && (
                   <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-40">Email</th>
@@ -412,6 +413,7 @@ const ScheduleViewer = () => {
               {filteredSchedules.map((schedule, index) => (
                 <tr key={schedule.paperId} 
                     className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors duration-150 ease-in-out`}>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{index + 1}</td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{schedule.paperId}</td>
                   {isAuthenticated && (
                     <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-[160px]">{schedule.email}</td>
