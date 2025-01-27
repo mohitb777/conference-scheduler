@@ -196,6 +196,80 @@ const ScheduleViewer = () => {
     }
   };
 
+  const downloadFilteredPDF = async (status, session = null) => {
+    try {
+      let url = `https://conference-scheduler-bay.vercel.app/api/schedule/download/pdf?status=${status}`;
+      if (session) {
+        url += `&session=${session}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf',
+          'x-auth-token': token
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download PDF');
+      }
+
+      const blob = await response.blob();
+      const fileUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = fileUrl;
+      const statusText = status === 1 ? 'confirmed' : status === 0 ? 'pending' : 'cancelled';
+      const sessionText = session ? `-${session}` : '';
+      a.download = `RAMSITA-2025-schedule-${statusText}${sessionText}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(fileUrl);
+      toast.success('PDF downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast.error('Failed to download PDF');
+    }
+  };
+
+  const downloadFilteredExcel = async (status, session = null) => {
+    try {
+      let url = `https://conference-scheduler-bay.vercel.app/api/schedule/download/excel?status=${status}`;
+      if (session) {
+        url += `&session=${session}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'x-auth-token': token
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download Excel file');
+      }
+
+      const blob = await response.blob();
+      const fileUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = fileUrl;
+      const statusText = status === 1 ? 'confirmed' : status === 0 ? 'pending' : 'cancelled';
+      const sessionText = session ? `-${session}` : '';
+      a.download = `RAMSITA-2025-schedule-${statusText}${sessionText}-${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(fileUrl);
+      toast.success('Excel file downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading Excel:', error);
+      toast.error('Failed to download Excel file');
+    }
+  };
+
   const handleSendEmails = async () => {
     try {
       if (!token) {
@@ -562,6 +636,59 @@ const ScheduleViewer = () => {
             </tbody>
           </table>
         </div>
+
+        {isAuthenticated && (
+          <div className="mb-6 space-y-4">
+            <div className="flex flex-wrap gap-4">
+              <button
+                onClick={() => downloadFilteredPDF(1)}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Download Confirmed PDF
+              </button>
+              <button
+                onClick={() => downloadFilteredPDF(0)}
+                className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+              >
+                Download Pending PDF
+              </button>
+              <button
+                onClick={() => downloadFilteredExcel(1)}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Download Confirmed Excel
+              </button>
+              <button
+                onClick={() => downloadFilteredExcel(0)}
+                className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+              >
+                Download Pending Excel
+              </button>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-3">Download by Session</h3>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {sessions.map((session) => (
+                  <div key={session} className="space-y-2">
+                    <button
+                      onClick={() => downloadFilteredPDF(1, session)}
+                      className="w-full px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                    >
+                      {session} PDF
+                    </button>
+                    <button
+                      onClick={() => downloadFilteredExcel(1, session)}
+                      className="w-full px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
+                    >
+                      {session} Excel
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

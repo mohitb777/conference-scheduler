@@ -242,7 +242,17 @@ router.post('/assign', async (req, res) => {
 // Download PDF endpoint
 router.get('/download/pdf', async (req, res) => {
   try {
-    const schedules = await Schedule.find({})
+    const { status, session } = req.query;
+    let query = {};
+    
+    if (status !== undefined) {
+      query.status = Number(status);
+    }
+    if (session) {
+      query.sessions = session;
+    }
+
+    const schedules = await Schedule.find(query)
       .sort({ date: 1, sessions: 1, timeSlots: 1 })
       .lean();
     
@@ -356,7 +366,17 @@ router.get('/download/pdf', async (req, res) => {
 // Download Excel endpoint
 router.get('/download/excel', async (req, res) => {
   try {
-    const schedules = await Schedule.find({})
+    const { status, session } = req.query;
+    let query = {};
+    
+    if (status !== undefined) {
+      query.status = Number(status);
+    }
+    if (session) {
+      query.sessions = session;
+    }
+
+    const schedules = await Schedule.find(query)
       .sort({ date: 1, sessions: 1, timeSlots: 1 })
       .lean();
 
