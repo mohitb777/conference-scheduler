@@ -20,6 +20,8 @@ const ScheduleViewer = () => {
   });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [searchPaperId, setSearchPaperId] = useState('');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [sortField, setSortField] = useState('paperId');
 
   const dates = ['2025-02-07', '2025-02-08'];
   const sessions = [
@@ -91,21 +93,39 @@ const ScheduleViewer = () => {
     return mode.toLowerCase().trim();
   };
 
-  const filteredSchedules = schedules.filter(schedule => {
-    const matchesSearch = !searchPaperId || 
-      schedule.paperId.toString().toLowerCase().includes(searchPaperId.toLowerCase());
-      
-    return (
-      matchesSearch &&
-      (!filters.date || schedule.date === filters.date) &&
-      (!filters.timeSlot || schedule.timeSlots === filters.timeSlot) &&
-      (!filters.session || schedule.sessions === filters.session) &&
-      (!filters.track || schedule.tracks === filters.track) &&
-      (!filters.mode || normalizeMode(schedule.mode) === normalizeMode(filters.mode)) &&
-      (!filters.venue || sessionVenueMapping[schedule.sessions] === filters.venue) &&
-      (filters.status === '' || Number(schedule.status) === Number(filters.status))
-    );
-  });
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const filteredSchedules = schedules
+    .filter(schedule => {
+      const matchesSearch = !searchPaperId || 
+        schedule.paperId.toString().toLowerCase().includes(searchPaperId.toLowerCase());
+        
+      return (
+        matchesSearch &&
+        (!filters.date || schedule.date === filters.date) &&
+        (!filters.timeSlot || schedule.timeSlots === filters.timeSlot) &&
+        (!filters.session || schedule.sessions === filters.session) &&
+        (!filters.track || schedule.tracks === filters.track) &&
+        (!filters.mode || normalizeMode(schedule.mode) === normalizeMode(filters.mode)) &&
+        (!filters.venue || sessionVenueMapping[schedule.sessions] === filters.venue) &&
+        (filters.status === '' || Number(schedule.status) === Number(filters.status))
+      );
+    })
+    .sort((a, b) => {
+      if (sortField === 'paperId') {
+        return sortDirection === 'asc' 
+          ? a.paperId - b.paperId
+          : b.paperId - a.paperId;
+      }
+      return 0;
+    });
 
   const downloadPDF = async () => {
     try {
@@ -389,7 +409,17 @@ const ScheduleViewer = () => {
             <thead>
               <tr className="bg-gradient-to-r from-blue-600 to-purple-600">
                 <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">S.No.</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Paper ID</th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider cursor-pointer group"
+                  onClick={() => handleSort('paperId')}
+                >
+                  Paper ID
+                  <span className="ml-2 inline-block">
+                    {sortField === 'paperId' ? (
+                      sortDirection === 'asc' ? '↑' : '↓'
+                    ) : '↕'}
+                  </span>
+                </th>
                 {isAuthenticated && (
                   <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-40">Email</th>
                 )}
