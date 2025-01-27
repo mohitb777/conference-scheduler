@@ -124,6 +124,17 @@ const ScheduleViewer = () => {
           ? a.paperId - b.paperId
           : b.paperId - a.paperId;
       }
+      
+      // For string-based fields
+      const fields = ['title', 'mode', 'tracks', 'date', 'timeSlots', 'sessions'];
+      if (fields.includes(sortField)) {
+        const aValue = (a[sortField] || '').toString().toLowerCase();
+        const bValue = (b[sortField] || '').toString().toLowerCase();
+        return sortDirection === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+      
       return 0;
     });
 
@@ -423,12 +434,72 @@ const ScheduleViewer = () => {
                 {isAuthenticated && (
                   <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-40">Email</th>
                 )}
-                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Title</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Mode</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Track</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Time Slot</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Session</th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort('title')}
+                >
+                  Title
+                  <span className="ml-2 inline-block">
+                    {sortField === 'title' ? (
+                      sortDirection === 'asc' ? '↑' : '↓'
+                    ) : '↕'}
+                  </span>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort('mode')}
+                >
+                  Mode
+                  <span className="ml-2 inline-block">
+                    {sortField === 'mode' ? (
+                      sortDirection === 'asc' ? '↑' : '↓'
+                    ) : '↕'}
+                  </span>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort('tracks')}
+                >
+                  Track
+                  <span className="ml-2 inline-block">
+                    {sortField === 'tracks' ? (
+                      sortDirection === 'asc' ? '↑' : '↓'
+                    ) : '↕'}
+                  </span>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort('date')}
+                >
+                  Date
+                  <span className="ml-2 inline-block">
+                    {sortField === 'date' ? (
+                      sortDirection === 'asc' ? '↑' : '↓'
+                    ) : '↕'}
+                  </span>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort('timeSlots')}
+                >
+                  Time Slot
+                  <span className="ml-2 inline-block">
+                    {sortField === 'timeSlots' ? (
+                      sortDirection === 'asc' ? '↑' : '↓'
+                    ) : '↕'}
+                  </span>
+                </th>
+                <th 
+                  className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort('sessions')}
+                >
+                  Session
+                  <span className="ml-2 inline-block">
+                    {sortField === 'sessions' ? (
+                      sortDirection === 'asc' ? '↑' : '↓'
+                    ) : '↕'}
+                  </span>
+                </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Venue</th>
                 {isAuthenticated && (
                   <>
