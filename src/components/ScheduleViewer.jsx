@@ -665,28 +665,6 @@ const ScheduleViewer = () => {
                 Download Pending Excel
               </button>
             </div>
-            
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-3">Download by Session</h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {sessions.map((session) => (
-                  <div key={session} className="space-y-2">
-                    <button
-                      onClick={() => downloadFilteredPDF(1, session)}
-                      className="w-full px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                    >
-                      {session} PDF
-                    </button>
-                    <button
-                      onClick={() => downloadFilteredExcel(1, session)}
-                      className="w-full px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
-                    >
-                      {session} Excel
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         )}
       </div>
