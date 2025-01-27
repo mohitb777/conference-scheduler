@@ -366,14 +366,12 @@ router.get('/download/pdf', async (req, res) => {
 // Download Excel endpoint
 router.get('/download/excel', async (req, res) => {
   try {
-    const { status, session } = req.query;
+    const { status } = req.query;
+    const isAuthenticated = req.header('x-auth-token');
     let query = {};
     
     if (status !== undefined) {
       query.status = Number(status);
-    }
-    if (session) {
-      query.sessions = session;
     }
 
     const schedules = await Schedule.find(query)
@@ -385,79 +383,66 @@ router.get('/download/excel', async (req, res) => {
     }
 
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'RAMSITA 2025';
-    workbook.lastModifiedBy = 'RAMSITA System';
-    workbook.created = new Date();
-    workbook.modified = new Date();
+    const worksheet = workbook.addWorksheet('Schedule');
 
-    // Group schedules by date
-    const dateGroups = schedules.reduce((acc, schedule) => {
-      acc[schedule.date] = acc[schedule.date] || [];
-      acc[schedule.date].push(schedule);
-      return acc;
-    }, {});
+    // Define columns based on authentication
+    const columns = isAuthenticated ? [
+      { header: 'Paper ID', key: 'paperId' },
+      { header: 'Email', key: 'email' },
+      { header: 'Title', key: 'title' },
+      { header: 'Date', key: 'date' },
+      { header: 'Time', key: 'timeSlots' },
+      { header: 'Session', key: 'sessions' },
+      { header: 'Mode', key: 'mode' },
+      { header: 'Track', key: 'tracks' },
+      { header: 'Venue', key: 'venue' }
+    ] : [
+      { header: 'Paper ID', key: 'paperId' },
+      { header: 'Title', key: 'title' },
+      { header: 'Date', key: 'date' },
+      { header: 'Time', key: 'timeSlots' },
+      { header: 'Session', key: 'sessions' },
+      { header: 'Mode', key: 'mode' },
+      { header: 'Track', key: 'tracks' },
+      { header: 'Venue', key: 'venue' }
+    ];
 
-    Object.entries(dateGroups).forEach(([date, dateSchedules]) => {
-      const worksheet = workbook.addWorksheet(date);
+    worksheet.columns = columns;
 
-      // Add headers with venue
-      worksheet.columns = [
-        { header: 'Time', key: 'time', width: 20 },
-        { header: 'Session', key: 'session', width: 15 },
-        { header: 'Paper ID', key: 'paperId', width: 15 },
-        { header: 'Title', key: 'title', width: 40 },
-        { header: 'Mode', key: 'mode', width: 10 },
-        { header: 'Track', key: 'track', width: 15 },
-        { header: 'Venue', key: 'venue', width: 30 },
-        { header: 'Email', key: 'email', width: 30 }
-      ];
-
-      // Style header row
-      const headerRow = worksheet.getRow(1);
-      headerRow.font = { bold: true };
-      headerRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFE0E0E0' }
+    // Add rows
+    schedules.forEach(schedule => {
+      const rowData = {
+        paperId: schedule.paperId,
+        title: schedule.title,
+        date: schedule.date,
+        timeSlots: schedule.timeSlots,
+        sessions: schedule.sessions,
+        mode: schedule.mode,
+        tracks: schedule.tracks,
+        venue: sessionVenueMapping[schedule.sessions] || schedule.venue || 'Not Assigned'
       };
-      headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
-      // Add data with venue
-      dateSchedules.forEach(schedule => {
-        worksheet.addRow({
-          time: schedule.timeSlots,
-          session: schedule.sessions,
-          paperId: schedule.paperId,
-          title: schedule.title,
-          mode: schedule.mode,
-          track: schedule.tracks,
-          venue: sessionVenueMapping[schedule.sessions] || schedule.venue || 'Not Assigned',
-          email: schedule.email
-        });
-      });
+      // Add email only if authenticated
+      if (isAuthenticated) {
+        rowData.email = schedule.email;
+      }
 
-      // Style all cells
-      worksheet.eachRow((row, rowNumber) => {
-        row.eachCell((cell) => {
-          cell.alignment = { vertical: 'middle', wrapText: true };
-          cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
-          };
-        });
-      });
+      worksheet.addRow(rowData);
     });
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    res.send(buffer);
+    // Style the header row
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.columns.forEach(column => {
+      column.width = 15;
+    });
 
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=RAMSITA-2025-schedule.xlsx');
+
+    await workbook.xlsx.write(res);
   } catch (error) {
     console.error('Error generating Excel:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ message: 'Error generating Excel file' });
-    }
+    res.status(500).json({ message: 'Error generating Excel file' });
   }
 });
 
