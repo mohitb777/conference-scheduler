@@ -242,124 +242,204 @@ router.post('/assign', async (req, res) => {
 // Download PDF endpoint
 router.get('/download/pdf', async (req, res) => {
   try {
-    const { status, session } = req.query;
-    let query = {};
+    const { status } = req.query;
+    let schedules;
     
-    if (status !== 'all' && status !== undefined) {
-      query.status = Number(status);
-    }
-    if (session) {
-      query.sessions = session;
+    if (status === 'all') {
+      schedules = await Schedule.find({})
+        .sort({ status: 1, date: 1, sessions: 1, timeSlots: 1 })
+        .lean();
+    } else {
+      let query = {};
+      if (status !== undefined) {
+        query.status = Number(status);
+      }
+      schedules = await Schedule.find(query)
+        .sort({ date: 1, sessions: 1, timeSlots: 1 })
+        .lean();
     }
 
-    const schedules = await Schedule.find(query)
-      .sort({ date: 1, sessions: 1, timeSlots: 1 })
-      .lean();
-    
     if (!schedules || schedules.length === 0) {
       return res.status(404).json({ message: 'No schedules found' });
     }
 
     const doc = new PDFDocument({ margin: 30, size: 'A4', autoFirstPage: true });
     
-    // Set response headers before any potential errors
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename=RAMSITA-2025-schedule.pdf');
     
-    // Handle errors in the PDF stream
-    doc.on('error', (err) => {
-      console.error('Error in PDF generation:', err);
-      if (!res.headersSent) {
-        res.status(500).json({ message: 'Error generating PDF' });
-      }
-    });
-
     doc.pipe(res);
     
-    // Add title
     doc.fontSize(20).text('RAMSITA 2025 Conference Schedule', { align: 'center' });
     doc.moveDown(2);
-    
-    // Group schedules by date
-    const schedulesByDate = schedules.reduce((acc, schedule) => {
-      const formattedDate = new Date(schedule.date).toLocaleDateString();
-      acc[formattedDate] = acc[formattedDate] || [];
-      acc[formattedDate].push(schedule);
-      return acc;
-    }, {});
 
-    Object.entries(schedulesByDate).forEach(([date, dateSchedules]) => {
-      doc.fontSize(14).text(`Date: ${date}`, { underline: true });
-      doc.moveDown();
+    if (status === 'all') {
+      // Group by status first
+      const statusGroups = {
+        'Confirmed': schedules.filter(s => s.status === 1),
+        'Pending': schedules.filter(s => s.status === 0),
+        'Cancelled': schedules.filter(s => s.status === 2)
+      };
 
-      // Define table structure
-      const headers = ['Time', 'Session', 'Paper ID', 'Title', 'Mode', 'Track', 'Venue'];
-      const colWidths = [60, 70, 70, 120, 50, 70, 130];
-      const startX = 30;
-      const startY = doc.y;
-      let currentY = startY;
+      for (const [statusName, statusSchedules] of Object.entries(statusGroups)) {
+        if (statusSchedules.length > 0) {
+          doc.addPage();
+          doc.fontSize(16).text(`${statusName} Schedules`, { align: 'center' });
+          doc.moveDown();
 
-      // Draw table header
-      doc.lineWidth(1);
-      doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), 20).stroke();
-      let currentX = startX;
-      headers.forEach((header, i) => {
-        doc.fontSize(10)
-           .text(header, currentX + 5, currentY + 5, { width: colWidths[i], align: 'left' });
-        currentX += colWidths[i];
-        if (i < headers.length - 1) {
-          doc.moveTo(currentX, currentY).lineTo(currentX, currentY + 20).stroke();
+          // Group by date within each status
+          const schedulesByDate = statusSchedules.reduce((acc, schedule) => {
+            const formattedDate = new Date(schedule.date).toLocaleDateString();
+            acc[formattedDate] = acc[formattedDate] || [];
+            acc[formattedDate].push(schedule);
+            return acc;
+          }, {});
+
+          Object.entries(schedulesByDate).forEach(([date, dateSchedules]) => {
+            doc.fontSize(14).text(`Date: ${date}`, { underline: true });
+            doc.moveDown();
+
+            // Define table structure
+            const headers = ['Time', 'Session', 'Paper ID', 'Title', 'Mode', 'Track', 'Venue'];
+            const colWidths = [60, 70, 70, 120, 50, 70, 130];
+            const startX = 30;
+            const startY = doc.y;
+            let currentY = startY;
+
+            // Draw table header
+            doc.lineWidth(1);
+            doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), 20).stroke();
+            let currentX = startX;
+            headers.forEach((header, i) => {
+              doc.fontSize(10)
+                 .text(header, currentX + 5, currentY + 5, { width: colWidths[i], align: 'left' });
+              currentX += colWidths[i];
+              if (i < headers.length - 1) {
+                doc.moveTo(currentX, currentY).lineTo(currentX, currentY + 20).stroke();
+              }
+            });
+            currentY += 20;
+
+            // Draw rows
+            dateSchedules.forEach(schedule => {
+              const rowData = [
+                schedule.timeSlots,
+                schedule.sessions,
+                schedule.paperId,
+                schedule.title,
+                schedule.mode,
+                schedule.tracks,
+                sessionVenueMapping[schedule.sessions] || schedule.venue || 'Not Assigned'
+              ];
+
+              const rowHeight = 40;
+              doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), rowHeight).stroke();
+              
+              let currentX = startX;
+              rowData.forEach((text, i) => {
+                doc.fontSize(9)
+                   .text(String(text), currentX + 5, currentY + 5, { 
+                     width: colWidths[i] - 10,
+                     align: 'left',
+                     height: rowHeight - 10
+                   });
+                currentX += colWidths[i];
+                if (i < rowData.length - 1) {
+                  doc.moveTo(currentX, currentY).lineTo(currentX, currentY + rowHeight).stroke();
+                }
+              });
+              currentY += rowHeight;
+
+              // Add new page if needed
+              if (currentY > doc.page.height - 100) {
+                doc.addPage();
+                currentY = 50;
+              }
+            });
+
+            doc.moveDown(2);
+          });
         }
-      });
-      currentY += 20;
+      }
+    } else {
+      // Existing code for single status
+      const schedulesByDate = schedules.reduce((acc, schedule) => {
+        const formattedDate = new Date(schedule.date).toLocaleDateString();
+        acc[formattedDate] = acc[formattedDate] || [];
+        acc[formattedDate].push(schedule);
+        return acc;
+      }, {});
 
-      // Draw rows
-      dateSchedules.forEach(schedule => {
-        const rowData = [
-          schedule.timeSlots,
-          schedule.sessions,
-          schedule.paperId,
-          schedule.title,
-          schedule.mode,
-          schedule.tracks,
-          sessionVenueMapping[schedule.sessions] || schedule.venue || 'Not Assigned'
-        ];
+      Object.entries(schedulesByDate).forEach(([date, dateSchedules]) => {
+        doc.fontSize(14).text(`Date: ${date}`, { underline: true });
+        doc.moveDown();
 
-        const rowHeight = 40;
-        doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), rowHeight).stroke();
-        
+        // Define table structure
+        const headers = ['Time', 'Session', 'Paper ID', 'Title', 'Mode', 'Track', 'Venue'];
+        const colWidths = [60, 70, 70, 120, 50, 70, 130];
+        const startX = 30;
+        const startY = doc.y;
+        let currentY = startY;
+
+        // Draw table header
+        doc.lineWidth(1);
+        doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), 20).stroke();
         let currentX = startX;
-        rowData.forEach((text, i) => {
-          doc.fontSize(9)
-             .text(String(text), currentX + 5, currentY + 5, { 
-               width: colWidths[i] - 10,
-               align: 'left',
-               height: rowHeight - 10
-             });
+        headers.forEach((header, i) => {
+          doc.fontSize(10)
+             .text(header, currentX + 5, currentY + 5, { width: colWidths[i], align: 'left' });
           currentX += colWidths[i];
-          if (i < rowData.length - 1) {
-            doc.moveTo(currentX, currentY).lineTo(currentX, currentY + rowHeight).stroke();
+          if (i < headers.length - 1) {
+            doc.moveTo(currentX, currentY).lineTo(currentX, currentY + 20).stroke();
           }
         });
-        currentY += rowHeight;
+        currentY += 20;
 
-        // Add new page if needed
-        if (currentY > doc.page.height - 100) {
-          doc.addPage();
-          currentY = 50;
-        }
+        // Draw rows
+        dateSchedules.forEach(schedule => {
+          const rowData = [
+            schedule.timeSlots,
+            schedule.sessions,
+            schedule.paperId,
+            schedule.title,
+            schedule.mode,
+            schedule.tracks,
+            sessionVenueMapping[schedule.sessions] || schedule.venue || 'Not Assigned'
+          ];
+
+          const rowHeight = 40;
+          doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), rowHeight).stroke();
+          
+          let currentX = startX;
+          rowData.forEach((text, i) => {
+            doc.fontSize(9)
+               .text(String(text), currentX + 5, currentY + 5, { 
+                 width: colWidths[i] - 10,
+                 align: 'left',
+                 height: rowHeight - 10
+               });
+            currentX += colWidths[i];
+            if (i < rowData.length - 1) {
+              doc.moveTo(currentX, currentY).lineTo(currentX, currentY + rowHeight).stroke();
+            }
+          });
+          currentY += rowHeight;
+
+          // Add new page if needed
+          if (currentY > doc.page.height - 100) {
+            doc.addPage();
+            currentY = 50;
+          }
+        });
+
+        doc.moveDown(2);
       });
-
-      doc.moveDown(2);
-    });
+    }
 
     doc.end();
-
   } catch (error) {
     console.error('Error generating PDF:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ message: 'Error generating PDF' });
-    }
+    res.status(500).json({ message: 'Error generating PDF' });
   }
 });
 
@@ -368,73 +448,141 @@ router.get('/download/excel', async (req, res) => {
   try {
     const { status } = req.query;
     const isAuthenticated = req.header('x-auth-token');
-    let query = {};
-    
-    if (status !== 'all' && status !== undefined) {
-      query.status = Number(status);
-    }
+    let schedules;
 
-    const schedules = await Schedule.find(query)
-      .sort({ date: 1, sessions: 1, timeSlots: 1 })
-      .lean();
-
-    if (!schedules || schedules.length === 0) {
-      return res.status(404).json({ message: 'No schedules found' });
+    if (status === 'all') {
+      schedules = await Schedule.find({})
+        .sort({ status: 1, date: 1, sessions: 1, timeSlots: 1 })
+        .lean();
+    } else {
+      let query = {};
+      if (status !== undefined) {
+        query.status = Number(status);
+      }
+      schedules = await Schedule.find(query)
+        .sort({ date: 1, sessions: 1, timeSlots: 1 })
+        .lean();
     }
 
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Schedule');
 
-    // Define columns based on authentication
-    const columns = isAuthenticated ? [
-      { header: 'Paper ID', key: 'paperId' },
-      { header: 'Email', key: 'email' },
-      { header: 'Title', key: 'title' },
-      { header: 'Date', key: 'date' },
-      { header: 'Time', key: 'timeSlots' },
-      { header: 'Session', key: 'sessions' },
-      { header: 'Mode', key: 'mode' },
-      { header: 'Track', key: 'tracks' },
-      { header: 'Venue', key: 'venue' }
-    ] : [
-      { header: 'Paper ID', key: 'paperId' },
-      { header: 'Title', key: 'title' },
-      { header: 'Date', key: 'date' },
-      { header: 'Time', key: 'timeSlots' },
-      { header: 'Session', key: 'sessions' },
-      { header: 'Mode', key: 'mode' },
-      { header: 'Track', key: 'tracks' },
-      { header: 'Venue', key: 'venue' }
-    ];
-
-    worksheet.columns = columns;
-
-    // Add rows
-    schedules.forEach(schedule => {
-      const rowData = {
-        paperId: schedule.paperId,
-        title: schedule.title,
-        date: schedule.date,
-        timeSlots: schedule.timeSlots,
-        sessions: schedule.sessions,
-        mode: schedule.mode,
-        tracks: schedule.tracks,
-        venue: sessionVenueMapping[schedule.sessions] || schedule.venue || 'Not Assigned'
+    if (status === 'all') {
+      // Create separate worksheets for each status
+      const statusGroups = {
+        'Confirmed': schedules.filter(s => s.status === 1),
+        'Pending': schedules.filter(s => s.status === 0),
+        'Cancelled': schedules.filter(s => s.status === 2)
       };
 
-      // Add email only if authenticated
-      if (isAuthenticated) {
-        rowData.email = schedule.email;
+      for (const [statusName, statusSchedules] of Object.entries(statusGroups)) {
+        if (statusSchedules.length > 0) {
+          const worksheet = workbook.addWorksheet(statusName);
+          
+          // Use the same column definitions as before
+          const columns = isAuthenticated ? [
+            { header: 'Paper ID', key: 'paperId' },
+            { header: 'Email', key: 'email' },
+            { header: 'Title', key: 'title' },
+            { header: 'Date', key: 'date' },
+            { header: 'Time', key: 'timeSlots' },
+            { header: 'Session', key: 'sessions' },
+            { header: 'Mode', key: 'mode' },
+            { header: 'Track', key: 'tracks' },
+            { header: 'Venue', key: 'venue' }
+          ] : [
+            { header: 'Paper ID', key: 'paperId' },
+            { header: 'Title', key: 'title' },
+            { header: 'Date', key: 'date' },
+            { header: 'Time', key: 'timeSlots' },
+            { header: 'Session', key: 'sessions' },
+            { header: 'Mode', key: 'mode' },
+            { header: 'Track', key: 'tracks' },
+            { header: 'Venue', key: 'venue' }
+          ];
+
+          worksheet.columns = columns;
+
+          // Add rows for this status
+          statusSchedules.forEach(schedule => {
+            const rowData = {
+              paperId: schedule.paperId,
+              title: schedule.title,
+              date: schedule.date,
+              timeSlots: schedule.timeSlots,
+              sessions: schedule.sessions,
+              mode: schedule.mode,
+              tracks: schedule.tracks,
+              venue: sessionVenueMapping[schedule.sessions] || schedule.venue || 'Not Assigned'
+            };
+
+            if (isAuthenticated) {
+              rowData.email = schedule.email;
+            }
+
+            worksheet.addRow(rowData);
+          });
+
+          // Style the header row
+          worksheet.getRow(1).font = { bold: true };
+          worksheet.columns.forEach(column => {
+            column.width = 15;
+          });
+        }
       }
+    } else {
+      // Existing code for single status
+      const worksheet = workbook.addWorksheet('Schedule');
+      // Define columns based on authentication
+      const columns = isAuthenticated ? [
+        { header: 'Paper ID', key: 'paperId' },
+        { header: 'Email', key: 'email' },
+        { header: 'Title', key: 'title' },
+        { header: 'Date', key: 'date' },
+        { header: 'Time', key: 'timeSlots' },
+        { header: 'Session', key: 'sessions' },
+        { header: 'Mode', key: 'mode' },
+        { header: 'Track', key: 'tracks' },
+        { header: 'Venue', key: 'venue' }
+      ] : [
+        { header: 'Paper ID', key: 'paperId' },
+        { header: 'Title', key: 'title' },
+        { header: 'Date', key: 'date' },
+        { header: 'Time', key: 'timeSlots' },
+        { header: 'Session', key: 'sessions' },
+        { header: 'Mode', key: 'mode' },
+        { header: 'Track', key: 'tracks' },
+        { header: 'Venue', key: 'venue' }
+      ];
 
-      worksheet.addRow(rowData);
-    });
+      worksheet.columns = columns;
 
-    // Style the header row
-    worksheet.getRow(1).font = { bold: true };
-    worksheet.columns.forEach(column => {
-      column.width = 15;
-    });
+      // Add rows
+      schedules.forEach(schedule => {
+        const rowData = {
+          paperId: schedule.paperId,
+          title: schedule.title,
+          date: schedule.date,
+          timeSlots: schedule.timeSlots,
+          sessions: schedule.sessions,
+          mode: schedule.mode,
+          tracks: schedule.tracks,
+          venue: sessionVenueMapping[schedule.sessions] || schedule.venue || 'Not Assigned'
+        };
+
+        // Add email only if authenticated
+        if (isAuthenticated) {
+          rowData.email = schedule.email;
+        }
+
+        worksheet.addRow(rowData);
+      });
+
+      // Style the header row
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.columns.forEach(column => {
+        column.width = 15;
+      });
+    }
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=RAMSITA-2025-schedule.xlsx');

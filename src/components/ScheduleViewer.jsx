@@ -219,7 +219,9 @@ const ScheduleViewer = () => {
       const fileUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = fileUrl;
-      const statusText = status === 1 ? 'confirmed' : status === 0 ? 'pending' : 'cancelled';
+      const statusText = status === 'all' ? 'all-status' : 
+                        status === 1 ? 'confirmed' : 
+                        status === 0 ? 'pending' : 'cancelled';
       const sessionText = session ? `-${session}` : '';
       a.download = `RAMSITA-2025-schedule-${statusText}${sessionText}-${new Date().toISOString().split('T')[0]}.pdf`;
       document.body.appendChild(a);
@@ -256,7 +258,9 @@ const ScheduleViewer = () => {
       const fileUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = fileUrl;
-      const statusText = status === 1 ? 'confirmed' : status === 0 ? 'pending' : 'cancelled';
+      const statusText = status === 'all' ? 'all-status' : 
+                        status === 1 ? 'confirmed' : 
+                        status === 0 ? 'pending' : 'cancelled';
       const sessionText = session ? `-${session}` : '';
       a.download = `RAMSITA-2025-schedule-${statusText}${sessionText}-${new Date().toISOString().split('T')[0]}.xlsx`;
       document.body.appendChild(a);
