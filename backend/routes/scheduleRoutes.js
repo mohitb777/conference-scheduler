@@ -245,7 +245,7 @@ router.get('/download/pdf', async (req, res) => {
     const { status, session } = req.query;
     let query = {};
     
-    if (status !== undefined) {
+    if (status !== 'all' && status !== undefined) {
       query.status = Number(status);
     }
     if (session) {
@@ -370,7 +370,7 @@ router.get('/download/excel', async (req, res) => {
     const isAuthenticated = req.header('x-auth-token');
     let query = {};
     
-    if (status !== undefined) {
+    if (status !== 'all' && status !== undefined) {
       query.status = Number(status);
     }
 
